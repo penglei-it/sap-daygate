@@ -1,0 +1,598 @@
+{
+  "id": "lite-skeleton-14day",
+  "version": "1.0.0",
+  "title": "轻量骨架：14 天自改课表",
+  "subtitle": "先能导入，再改成你的课",
+  "category": "task",
+  "locale": "zh-CN",
+  "supportedPersonTypes": [
+    "child_primary",
+    "teen_student",
+    "college_student",
+    "working_professional",
+    "career_switcher",
+    "senior_learner",
+    "exam_sprinter"
+  ],
+  "summary": "已通过质量门的可改骨架。下载后改 title/content/path 即可导入。",
+  "phases": [
+    {
+      "id": "A",
+      "name": "启动周",
+      "goal": "建立每日节奏",
+      "gateId": "LITE-G1"
+    },
+    {
+      "id": "B",
+      "name": "巩固周",
+      "goal": "完成第二道门禁",
+      "gateId": "LITE-G2"
+    }
+  ],
+  "days": [
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第1天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 1。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t1a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t1b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true
+    },
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第2天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 2。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t2a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t2b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false
+    },
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第3天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 3。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t3a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t3b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true
+    },
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第4天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 4。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t4a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t4b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false
+    },
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第5天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 5。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t5a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t5b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true
+    },
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第6天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 6。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t6a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t6b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false
+    },
+    {
+      "phaseId": "A",
+      "phaseName": "启动周",
+      "week": 1,
+      "title": "第7天：完成今日小目标",
+      "track": "gate",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 7。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t7a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t7b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true,
+      "gateId": "LITE-G1",
+      "requireEvidence": true
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第8天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 8。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t8a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t8b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第9天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 9。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t9a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t9b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第10天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 10。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t10a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t10b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第11天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 11。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t11a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t11b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第12天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 12。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t12a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t12b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第13天：完成今日小目标",
+      "track": "main",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 13。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t13a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t13b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": true
+    },
+    {
+      "phaseId": "B",
+      "phaseName": "巩固周",
+      "week": 2,
+      "title": "第14天：完成今日小目标",
+      "track": "gate",
+      "estimatedMinutes": 30,
+      "content": "这是轻量骨架日课 14。请把标题与内容改成你的主题，保持路径可勾选、交付物可核对。导入后可在设置里导出再细改。骨架用于降低上手成本，不是最终课表。",
+      "path": [
+        "打开今日材料",
+        "完成核心步骤",
+        "自检交付物",
+        "勾选验收"
+      ],
+      "references": [
+        {
+          "title": "示例参考",
+          "url": "https://example.com"
+        }
+      ],
+      "acceptanceCriteria": [
+        "路径可勾选完成",
+        "交付物可描述"
+      ],
+      "acceptanceTests": [
+        {
+          "id": "t14a",
+          "question": "今天做完了吗？",
+          "passHint": "是"
+        },
+        {
+          "id": "t14b",
+          "question": "交付物是什么？",
+          "passHint": "一句话",
+          "requiresTypedAnswer": true
+        }
+      ],
+      "deliverable": "今日笔记或作品说明",
+      "minimumMode": false,
+      "gateId": "LITE-G2",
+      "requireEvidence": true
+    }
+  ]
+}

@@ -245,6 +245,47 @@ h3 {
 .status-fail { color: var(--fail); font-weight: 700; }
 .status-skipped { color: var(--ink-soft); font-weight: 700; }
 
+.person-hint {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.companion-hint,
+.mode-explain {
+  margin-top: 0;
+}
+
+.sprint-must {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f7f3eb;
+  border: 1px solid var(--line);
+}
+
+.guardian-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.action-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.action-list li + li {
+  margin-top: 8px;
+}
+
+.evidence-chips {
+  margin-bottom: 8px;
+}
+.status-partial { color: #b8860b; font-weight: 700; }
+.status-fail { color: var(--fail); font-weight: 700; }
+.status-skipped { color: var(--ink-soft); font-weight: 700; }
+
 .gap-panel,
 .skip-panel {
   padding: 12px 14px;

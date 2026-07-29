@@ -211,6 +211,39 @@ export function TaskPage({ api }: { api: DayGateApi }) {
 
           <label className="field">
             成果证据（路径/链接/对象名）
+            {!readOnly ? (
+              <p className="muted" style={{ margin: '4px 0 8px' }}>
+                {api.person.taskEvidenceHint}
+                {isGate ? ' 门禁日请写具体可核对的成果。' : ''}
+              </p>
+            ) : null}
+            {!readOnly ? (
+              <div className="meta-row evidence-chips">
+                {[
+                  {
+                    label: '填入路径示例',
+                    text: 'notes/day-demo.md（或本机文件路径）',
+                  },
+                  {
+                    label: '填入链接示例',
+                    text: 'https://example.com/my-work',
+                  },
+                  {
+                    label: '填入对象名示例',
+                    text: '对象/事务：ZDEMO_REPORT',
+                  },
+                ].map((chip) => (
+                  <button
+                    key={chip.label}
+                    className="btn ghost"
+                    type="button"
+                    onClick={() => setEvidence(chip.text)}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <textarea
               value={evidence}
               disabled={readOnly}

@@ -14,6 +14,19 @@ function Root() {
   );
 }
 
+/** Walks the 3-step onboarding wizard to the finish button. */
+async function completeOnboardingWizard(
+  user: ReturnType<typeof userEvent.setup>,
+) {
+  expect(await screen.findByText('你是谁')).toBeTruthy();
+  const nameInput = screen.getByLabelText('怎么称呼你');
+  await user.clear(nameInput);
+  await user.type(nameInput, '组件测试用户');
+  await user.click(screen.getByRole('button', { name: '下一步：选课程' }));
+  await user.click(screen.getByRole('button', { name: '下一步：监护设置' }));
+  await user.click(screen.getByTestId('start-day-1'));
+}
+
 describe('app smoke (jsdom)', () => {
   afterEach(() => {
     cleanup();
@@ -24,12 +37,7 @@ describe('app smoke (jsdom)', () => {
     const user = userEvent.setup();
     localStorage.clear();
     render(<Root />);
-
-    expect(await screen.findByText(/先选「你是谁」/)).toBeTruthy();
-    const nameInput = screen.getByLabelText('怎么称呼你');
-    await user.clear(nameInput);
-    await user.type(nameInput, '组件测试用户');
-    await user.click(screen.getByTestId('start-day-1'));
+    await completeOnboardingWizard(user);
 
     expect(await screen.findByTestId('enter-task')).toBeTruthy();
     await user.click(screen.getByTestId('enter-task'));
@@ -41,7 +49,7 @@ describe('app smoke (jsdom)', () => {
     const user = userEvent.setup();
     localStorage.clear();
     render(<Root />);
-    await user.click(await screen.findByTestId('start-day-1'));
+    await completeOnboardingWizard(user);
     await user.click(await screen.findByRole('link', { name: '设置' }));
     expect(await screen.findByTestId('backup-hub')).toBeTruthy();
     expect(screen.getByText(/保护学习进度/)).toBeTruthy();

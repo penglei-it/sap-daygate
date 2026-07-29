@@ -1,5 +1,14 @@
 import { expect, test } from '@playwright/test';
 
+/** Completes the 3-step onboarding wizard. */
+async function finishOnboarding(page: import('@playwright/test').Page) {
+  await expect(page.getByText('你是谁')).toBeVisible();
+  await page.getByLabel('怎么称呼你').fill('E2E学习者');
+  await page.getByRole('button', { name: '下一步：选课程' }).click();
+  await page.getByRole('button', { name: '下一步：监护设置' }).click();
+  await page.getByTestId('start-day-1').click();
+}
+
 test.describe('DayGate smoke', () => {
   test('onboarding to today task entry', async ({ page }) => {
     await page.addInitScript(() => {
@@ -7,10 +16,7 @@ test.describe('DayGate smoke', () => {
     });
 
     await page.goto('/');
-    await expect(page.getByText('先选「你是谁」')).toBeVisible();
-
-    await page.getByLabel('怎么称呼你').fill('E2E学习者');
-    await page.getByTestId('start-day-1').click();
+    await finishOnboarding(page);
 
     await expect(page.getByRole('navigation', { name: '主导航' })).toBeVisible();
     await expect(page.getByTestId('enter-task')).toBeVisible({ timeout: 15_000 });
@@ -24,7 +30,7 @@ test.describe('DayGate smoke', () => {
       localStorage.clear();
     });
     await page.goto('/');
-    await page.getByTestId('start-day-1').click();
+    await finishOnboarding(page);
     await page.getByRole('link', { name: '设置' }).click();
     await expect(page.getByTestId('backup-hub')).toBeVisible();
     await expect(page.getByText('保护学习进度')).toBeVisible();

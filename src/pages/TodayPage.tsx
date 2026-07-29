@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { statusLabel } from '../core/acceptance';
+import { filterDays, statusLabel } from '../core/acceptance';
 import type { DayGateApi } from '../hooks/useDayGate';
 import { downloadBackupFile } from '../lib/backupPreview';
 import { addDays } from '../lib/date';
 
 /**
- * Today hub: primary daily surface with backup reminders and soft tips.
+ * Today hub: primary daily surface with mode coaching and backup tips.
  * @param props.api - DayGate API.
  */
 export function TodayPage({ api }: { api: DayGateApi }) {
@@ -20,12 +20,28 @@ export function TodayPage({ api }: { api: DayGateApi }) {
         ? '冲刺模式'
         : '标准模式';
 
+  const standardCount = filterDays(api.allDays, {
+    mode: 'standard',
+    disabledTracks: state.disabledTracks,
+  }).length;
+  const visibleCount = api.visibleDays.length;
+  const modeExplain =
+    state.mode === 'minimum'
+      ? `保底：只显示标记为保底的日课和门禁。当前可见 ${visibleCount} 课（标准模式为 ${standardCount} 课）。`
+      : state.mode === 'sprint'
+        ? `冲刺：已隐藏 side 侧支，列表可能变短。当前可见 ${visibleCount} 课（标准 ${standardCount} 课）。`
+        : `标准：完整日课。当前可见 ${visibleCount} 课。`;
+
   const neverBackedUp = !state.lastBackupAt && !state.lastFolderBackupAt;
   const showSoftBackupTip =
     !state.backupReminderPending &&
     neverBackedUp &&
     !state.backupSoftTipDismissed &&
     api.stats.pass >= 3;
+
+  const suggested = state.suggestedMode;
+  const showSuggested =
+    Boolean(suggested) && suggested !== state.mode;
 
   /**
    * Downloads a backup file and records the export timestamp.
@@ -40,6 +56,40 @@ export function TodayPage({ api }: { api: DayGateApi }) {
 
   return (
     <div className={`stack density-${person.uiDensity}`}>
+      {showSuggested && suggested ? (
+        <section className="soft-tip stack" data-testid="suggested-mode">
+          <p style={{ margin: 0 }}>
+            监护人建议今天改用
+            <strong>
+              {suggested === 'minimum'
+                ? '保底模式'
+                : suggested === 'sprint'
+                  ? '冲刺模式'
+                  : '标准模式'}
+            </strong>
+            ，先把节奏接上。
+          </p>
+          <div className="meta-row" style={{ margin: 0 }}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() =>
+                api.update({ mode: suggested, suggestedMode: undefined })
+              }
+            >
+              采纳建议
+            </button>
+            <button
+              className="btn ghost"
+              type="button"
+              onClick={() => api.update({ suggestedMode: undefined })}
+            >
+              忽略
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       {state.backupReminderPending ? (
         <section className="card stack backup-nudge" data-testid="backup-gate-nudge">
           <strong>建议马上备份一下</strong>
@@ -136,6 +186,10 @@ export function TodayPage({ api }: { api: DayGateApi }) {
           <p className="muted">
             {pack.title} · 日预算约 {person.dailyBudgetMinutes} 分钟
           </p>
+          <p className="person-hint">{person.todayHint}</p>
+          {person.companionHint ? (
+            <p className="muted companion-hint">{person.companionHint}</p>
+          ) : null}
           <div className="meta-row">
             <label className="field" style={{ minWidth: 180 }}>
               查看日期
@@ -170,10 +224,19 @@ export function TodayPage({ api }: { api: DayGateApi }) {
 
           {!todayPlan ? (
             <div>
-              <h2>这一天不在当前 Pack 映射内</h2>
+              <h2>
+                {state.mode === 'minimum'
+                  ? '今天不在保底课表里'
+                  : state.mode === 'sprint'
+                    ? '今天可能被冲刺模式隐藏了'
+                    : '这一天不在当前课表映射内'}
+              </h2>
               <p className="muted">
-                开营日：{state.startDate}；偏移 {offsetToday} 天；本包共 {api.allDays.length}{' '}
-                天。可换日期或在设置中换包。
+                {state.mode === 'minimum'
+                  ? '可查看右侧保底任务池，或切回标准模式看完整课表。'
+                  : state.mode === 'sprint'
+                    ? 'side 侧支已隐藏。可换日期，或切回标准模式。'
+                    : `开营日：${state.startDate}；偏移 ${offsetToday} 天；本包共 ${api.allDays.length} 天。可换日期或在设置中换包。`}
               </p>
             </div>
           ) : (
@@ -187,6 +250,12 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                   <span className="chip gate">门禁 {todayPlan.gateId}</span>
                 ) : null}
               </div>
+              {person.id === 'exam_sprinter' ? (
+                <p className="sprint-must">
+                  <strong>今日必做：</strong>
+                  {todayPlan.title}
+                </p>
+              ) : null}
               <h1>{todayPlan.title}</h1>
               <p className="muted">{todayPlan.phaseName}</p>
               <p>{todayPlan.content}</p>
@@ -231,22 +300,30 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                 mode: e.target.value as typeof state.mode,
               })
             }
+            data-testid="mode-select"
           >
             <option value="standard">标准：完整日课</option>
             <option value="minimum">保底：只做 minimum / 门禁</option>
             <option value="sprint">冲刺：隐藏 side 轨</option>
           </select>
+          <p className="muted mode-explain" data-testid="mode-explain">
+            {modeExplain}
+          </p>
 
           {state.mode === 'minimum' ? (
             <div>
               <h3>保底任务池</h3>
-              <ul className="muted">
-                {minimumPool.map((d) => (
-                  <li key={d.dayIndex}>
-                    <Link to={`/task/${d.dayIndex}`}>{d.title}</Link>
-                  </li>
-                ))}
-              </ul>
+              {minimumPool.length === 0 ? (
+                <p className="muted">本包暂无保底日，可切回标准模式。</p>
+              ) : (
+                <ul className="muted">
+                  {minimumPool.map((d) => (
+                    <li key={d.dayIndex}>
+                      <Link to={`/task/${d.dayIndex}`}>{d.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ) : null}
 
@@ -255,7 +332,7 @@ export function TodayPage({ api }: { api: DayGateApi }) {
             <div className="gate-row">
               {api.stats.gates.map((g) => (
                 <span key={g.id} className="chip">
-                  {g.id}:{g.status}
+                  {g.id}:{statusLabel(g.status)}
                 </span>
               ))}
             </div>

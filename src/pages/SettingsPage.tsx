@@ -199,12 +199,18 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             value={api.state.packId}
             onChange={(e) => onPackChange(e.target.value)}
           >
-            {packs.map((p) => (
-              <option key={p.id} value={p.id}>
-                [{p.category}] {p.title}
-                {api.state.customPacks.some((c) => c.id === p.id) ? ' · 自定义' : ''}
-              </option>
-            ))}
+            {packs.map((p) => {
+              const recommended =
+                api.person.recommendedPackCategories.includes(p.category);
+              return (
+                <option key={p.id} value={p.id}>
+                  {recommended ? '推荐 · ' : ''}[{p.category}] {p.title}
+                  {api.state.customPacks.some((c) => c.id === p.id)
+                    ? ' · 自定义'
+                    : ''}
+                </option>
+              );
+            })}
           </select>
         </label>
         <p className="muted">换包前会确认；旧包进度按包分别保留。</p>
@@ -227,10 +233,10 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
       </section>
 
       <section className="card stack">
-        <h2>自定义课程包热加载</h2>
+        <h2>导入自己的课表</h2>
         <p className="muted">
-          导入符合结构的课程包文件（需通过质量门禁）。示例见{' '}
-          <code>public/examples/sample-custom-pack.json</code>
+          把课表文件导入本机即可用。不会上传到服务器。建议先下载「轻量骨架」改标题和内容，再导入。
+          失败时会列出需要改的地方。
         </p>
         <div className="meta-row">
           <button
@@ -245,10 +251,17 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
           </button>
           <a
             className="btn ghost"
+            href={`${import.meta.env.BASE_URL}examples/lite-skeleton-14day.json`}
+            download
+          >
+            下载轻量骨架
+          </a>
+          <a
+            className="btn ghost"
             href={`${import.meta.env.BASE_URL}examples/sample-custom-pack.json`}
             download
           >
-            下载示例
+            下载完整示例
           </a>
         </div>
         <input
@@ -264,14 +277,23 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             setLocalMsg(
               ok
                 ? api.packImportMessage
-                : api.packImportMessage ?? '导入失败，请检查文件与质量规则',
+                : api.packImportMessage ?? '导入失败，请按下方清单修改',
             );
             e.target.value = '';
           }}
         />
         {(localMsg || api.packImportMessage) && (
-          <p className="muted">{localMsg ?? api.packImportMessage}</p>
+          <p className={api.packImportIssues.length ? 'status-fail' : 'muted'}>
+            {localMsg ?? api.packImportMessage}
+          </p>
         )}
+        {api.packImportIssues.length > 0 ? (
+          <ul className="import-preview-list" data-testid="pack-import-issues">
+            {api.packImportIssues.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
         {api.state.customPacks.length > 0 ? (
           <ul>
             {api.state.customPacks.map((p) => (
@@ -306,7 +328,7 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
           />
         </label>
         <label className="field">
-          退出监护视图 PIN（可选，仅存哈希）
+          退出监护视图 PIN（仅存哈希）
           <input
             type="password"
             defaultValue=""
@@ -319,8 +341,41 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             }}
           />
         </label>
+        {api.state.guardianPinHash ? (
+          <button
+            className="btn ghost"
+            type="button"
+            onClick={() => {
+              if (confirm('清除监护 PIN？之后退出监护视图将不再需要密码。')) {
+                api.clearGuardianPin();
+              }
+            }}
+          >
+            清除 PIN
+          </button>
+        ) : null}
+        {api.person.preferGuardianPin && !api.state.guardianPinHash ? (
+          <p className="muted">
+            当前人员类型建议先设置 PIN，再进入监护视图，避免误操作。
+          </p>
+        ) : null}
         <div className="meta-row">
-          <button className="btn" type="button" onClick={() => api.enterGuardian()}>
+          <button
+            className="btn"
+            type="button"
+            onClick={() => {
+              if (
+                api.person.preferGuardianPin &&
+                !api.state.guardianPinHash
+              ) {
+                const go = confirm(
+                  '尚未设置监护 PIN。儿童设备上任何人都能退出监护视图。仍要进入吗？\n\n点「取消」可先在上方填写 PIN。',
+                );
+                if (!go) return;
+              }
+              api.enterGuardian();
+            }}
+          >
             进入监护人视图
           </button>
         </div>

@@ -31,6 +31,7 @@ export function createDefaultState(): UserState {
     lastBackupAt: undefined,
     lastBackupMethod: undefined,
     backupSoftTipDismissed: false,
+    suggestedMode: undefined,
     schemaVersion: 3,
   };
 }
@@ -81,6 +82,12 @@ export function loadState(): UserState {
           ? parsed.lastBackupMethod
           : undefined,
       backupSoftTipDismissed: Boolean(parsed.backupSoftTipDismissed),
+      suggestedMode:
+        parsed.suggestedMode === 'standard' ||
+        parsed.suggestedMode === 'minimum' ||
+        parsed.suggestedMode === 'sprint'
+          ? parsed.suggestedMode
+          : undefined,
       schemaVersion: 3,
       personTypeId: parsed.personTypeId ?? base.personTypeId,
       packId: parsed.packId ?? base.packId,

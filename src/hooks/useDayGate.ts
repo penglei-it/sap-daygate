@@ -20,6 +20,10 @@ import {
 } from '../lib/folderBackup';
 import { hashPin, verifyPin } from '../lib/security';
 import {
+  formatPackIssuesZh,
+  packIssueToZh,
+} from '../lib/packIssueZh';
+import {
   createDefaultState,
   exportStateJson,
   loadState,
@@ -48,6 +52,7 @@ export function useDayGate() {
   const [state, setState] = useState<UserState>(() => loadState());
   const [viewDate, setViewDate] = useState(() => formatISODate(new Date()));
   const [packImportMessage, setPackImportMessage] = useState<string | null>(null);
+  const [packImportIssues, setPackImportIssues] = useState<string[]>([]);
   const [folderBackupStatus, setFolderBackupStatus] =
     useState<FolderBackupStatus>(() => ({
       supported: isFolderBackupSupported(),
@@ -340,9 +345,14 @@ export function useDayGate() {
   const importCustomPack = useCallback((text: string) => {
     const result = importPackFromJson(text);
     if (!result.pack) {
-      setPackImportMessage(result.error ?? '导入失败');
+      const zhIssues = formatPackIssuesZh(result.validation.issues);
+      setPackImportIssues(zhIssues);
+      setPackImportMessage(
+        packIssueToZh(result.error ?? '导入失败'),
+      );
       return false;
     }
+    setPackImportIssues([]);
     setState((s) => {
       const others = s.customPacks.filter((p) => p.id !== result.pack!.id);
       return {
@@ -351,7 +361,7 @@ export function useDayGate() {
         packId: result.pack!.id,
       };
     });
-    setPackImportMessage(`已热加载并切换到：${result.pack.title}`);
+    setPackImportMessage(`已导入并切换到：${result.pack.title}`);
     return true;
   }, []);
 
@@ -369,8 +379,31 @@ export function useDayGate() {
     });
   }, []);
 
+  /**
+   * Enters guardian view. Callers should gate PIN for preferGuardianPin types.
+   */
   const enterGuardian = useCallback(() => {
     setState((s) => ({ ...s, viewRole: 'guardian' }));
+  }, []);
+
+  /**
+   * Suggests minimum mode to the learner (guardian action).
+   * @param dayIndex - Day for companion note.
+   */
+  const suggestMinimumMode = useCallback((dayIndex: number) => {
+    setState((s) => {
+      const key = `${s.packId}:${dayIndex}`;
+      return {
+        ...s,
+        suggestedMode: 'minimum',
+        companionNotes: {
+          ...s.companionNotes,
+          [key]:
+            s.companionNotes[key] ||
+            '家长建议：今天先用保底模式，完成一小步就很好。',
+        },
+      };
+    });
   }, []);
 
   const leaveGuardian = useCallback(
@@ -386,6 +419,11 @@ export function useDayGate() {
   const setGuardianPin = useCallback(async (rawPin: string) => {
     const guardianPinHash = await hashPin(rawPin);
     setState((s) => ({ ...s, guardianPinHash }));
+  }, []);
+
+  /** Clears guardian PIN after user confirms in UI. */
+  const clearGuardianPin = useCallback(() => {
+    setState((s) => ({ ...s, guardianPinHash: '' }));
   }, []);
 
   const dismissBackupReminder = useCallback(() => {
@@ -511,10 +549,13 @@ export function useDayGate() {
     importCustomPack,
     removeCustomPack,
     packImportMessage,
+    packImportIssues,
     setPackImportMessage,
     enterGuardian,
     leaveGuardian,
     setGuardianPin,
+    clearGuardianPin,
+    suggestMinimumMode,
     setCompanionNote,
     dismissBackupReminder,
     markBackupExported,

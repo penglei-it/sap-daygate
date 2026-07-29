@@ -105,6 +105,14 @@ export interface PersonTypeProfile {
   /** UI hint, e.g. larger type for seniors. */
   uiDensity: 'compact' | 'comfortable' | 'roomy';
   recommendedPackCategories: PackCategory[];
+  /** Short coaching line shown on Today. */
+  todayHint: string;
+  /** Evidence-field coaching on Task page. */
+  taskEvidenceHint: string;
+  /** Optional companion/parent tip (children / seniors). */
+  companionHint?: string;
+  /** When true, strongly nudge guardian PIN before entering guardian view. */
+  preferGuardianPin?: boolean;
 }
 
 /** Custom onboarding field defined by a pack. */
@@ -196,6 +204,10 @@ export interface UserState {
    * (shown when never backed up and enough Passes).
    */
   backupSoftTipDismissed?: boolean;
+  /**
+   * Mode suggested by guardian; learner can accept or dismiss on Today.
+   */
+  suggestedMode?: 'standard' | 'minimum' | 'sprint';
   /** Schema version for migrations. */
   schemaVersion: number;
 }

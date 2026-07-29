@@ -1,4 +1,5 @@
 import type { CurriculumPack, PersonTypeId } from '../types/curriculum';
+import { getPersonType } from '../core/personTypes';
 import { examGaoxiangPack } from './examGaoxiangPack';
 import { sapAbapPack } from './sapAbapPack';
 import { skillTypescriptPack } from './skillTypescriptPack';
@@ -45,6 +46,7 @@ export function getPack(
 
 /**
  * Lists packs compatible with a person type.
+ * Recommended categories for that person type are sorted first.
  * @param personTypeId - Selected person type.
  * @param customPacks - Optional custom packs.
  */
@@ -52,7 +54,16 @@ export function listPacksForPerson(
   personTypeId: PersonTypeId,
   customPacks: CurriculumPack[] = [],
 ): CurriculumPack[] {
-  return mergeWithCustomPacks(customPacks).filter((p) =>
+  const recommended = getPersonType(personTypeId).recommendedPackCategories;
+  const list = mergeWithCustomPacks(customPacks).filter((p) =>
     p.supportedPersonTypes.includes(personTypeId),
   );
+  return [...list].sort((a, b) => {
+    const ai = recommended.indexOf(a.category);
+    const bi = recommended.indexOf(b.category);
+    const aRank = ai === -1 ? 99 : ai;
+    const bRank = bi === -1 ? 99 : bi;
+    if (aRank !== bRank) return aRank - bRank;
+    return a.title.localeCompare(b.title, 'zh-CN');
+  });
 }

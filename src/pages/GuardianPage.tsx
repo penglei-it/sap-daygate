@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { statusLabel } from '../core/acceptance';
 import type { DayGateApi } from '../hooks/useDayGate';
+import { addDays } from '../lib/date';
 
 /**
  * Guardian/companion dashboard: read-only progress + soft reminders.
  * @param props.api - DayGate API.
  */
 export function GuardianPage({ api }: { api: DayGateApi }) {
-  const { guardianSummary: s, state, todayPlan, person } = api;
+  const { guardianSummary: s, state, todayPlan, person, allDays } = api;
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
   const noteKey = todayPlan ? `${state.packId}:${todayPlan.dayIndex}` : '';
@@ -15,13 +17,34 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
     todayPlan ? state.companionNotes[noteKey] ?? '' : '',
   );
 
+  const recentCells = useMemo(() => {
+    const start = state.startDate;
+    return Array.from({ length: 7 }, (_, i) => {
+      const iso = addDays(api.viewDate, i - 6);
+      const offset =
+        Math.round(
+          (new Date(iso + 'T00:00:00').getTime() -
+            new Date(start + 'T00:00:00').getTime()) /
+            86_400_000,
+        );
+      const day = allDays.find((d) => d.dateOffset === offset);
+      const cin = day ? api.getCheckIn(day.dayIndex) : undefined;
+      return {
+        iso,
+        dayIndex: day?.dayIndex,
+        status: cin?.status,
+        title: day?.title ?? '无课',
+      };
+    });
+  }, [allDays, api, state.startDate]);
+
+  const nextGate = api.stats.gates.find((g) => g.status !== 'pass');
+
   return (
     <div className={`stack density-${person.uiDensity}`}>
       <section className="card stack">
         <div className="eyebrow">监护人视图 · 只读陪伴</div>
-        <h1>
-          {s.learnerName} 的学习概览
-        </h1>
+        <h1>{s.learnerName} 的学习概览</h1>
         <p className="muted">
           当前课程：{s.packTitle}。此视图不能代打卡，只能看进度、留鼓励、给软提醒。
         </p>
@@ -29,7 +52,7 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
         <div className="stat-grid">
           <div className="stat">
             <b>{s.completionRate}%</b>
-            <span className="muted">Pass 完成率</span>
+            <span className="muted">通过完成率</span>
           </div>
           <div className="stat">
             <b>{s.streakDays}</b>
@@ -43,22 +66,66 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
             <b>
               {s.passCount}/{s.totalDays}
             </b>
-            <span className="muted">Pass / 总课</span>
+            <span className="muted">通过 / 总课</span>
           </div>
         </div>
+      </section>
+
+      <section className="card stack">
+        <h2>近 7 日状态</h2>
+        <div className="guardian-week">
+          {recentCells.map((c) => (
+            <div
+              key={c.iso}
+              className={`cal-cell ${c.status ?? 'empty'}`}
+              title={`${c.iso} · ${c.title}${c.status ? ` · ${statusLabel(c.status)}` : ''}`}
+            >
+              {c.iso.slice(5)}
+            </div>
+          ))}
+        </div>
+        {nextGate ? (
+          <p className="muted">
+            下一道门禁：<strong>{nextGate.id}</strong>（
+            {statusLabel(nextGate.status)}）
+          </p>
+        ) : (
+          <p className="muted">本包门禁均已通过。</p>
+        )}
       </section>
 
       <section className="card stack">
         <h2>今日软提醒</h2>
         <p>{s.softReminder}</p>
         <p className="muted">
-          今日任务：{s.todayTitle ?? '不在课表映射内'} · 状态 {s.todayStatus}
+          今日任务：{s.todayTitle ?? '不在课表映射内'} · 状态{' '}
+          {statusLabel(s.todayStatus)}
         </p>
-        {todayPlan ? (
-          <Link className="btn secondary" to={`/task/${todayPlan.dayIndex}`}>
-            只读查看今日任务
-          </Link>
-        ) : null}
+        <div className="meta-row">
+          {todayPlan ? (
+            <Link className="btn secondary" to={`/task/${todayPlan.dayIndex}`}>
+              只读查看今日任务
+            </Link>
+          ) : null}
+          {todayPlan ? (
+            <button
+              className="btn"
+              type="button"
+              onClick={() => {
+                api.suggestMinimumMode(todayPlan.dayIndex);
+                setNote(
+                  state.companionNotes[noteKey] ||
+                    '家长建议：今天先用保底模式，完成一小步就很好。',
+                );
+              }}
+            >
+              建议今天改保底
+            </button>
+          ) : null}
+        </div>
+        <p className="muted">
+          「建议今天改保底」会给学习者一条横幅，由对方决定是否采纳。
+        </p>
       </section>
 
       <section className="card stack">
@@ -94,7 +161,9 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
             />
           </label>
         ) : (
-          <p className="muted">未设置 PIN，可直接返回。</p>
+          <p className="muted">
+            未设置 PIN，可直接返回。建议到设置里补上 PIN，尤其是儿童设备。
+          </p>
         )}
         {pinError ? <p className="status-fail">{pinError}</p> : null}
         <button
