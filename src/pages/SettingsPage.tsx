@@ -1,11 +1,17 @@
 import { useRef, useState } from 'react';
 import { PERSON_TYPES } from '../core/personTypes';
 import type { DayGateApi } from '../hooks/useDayGate';
+import {
+  downloadBackupFile,
+  formatBackupTime,
+  parseBackupPreview,
+  type BackupPreview,
+} from '../lib/backupPreview';
 import { listPacksForPerson } from '../packs';
 import type { PersonTypeId } from '../types/curriculum';
 
 /**
- * Settings: person/pack switch, custom pack hot-load, guardian, backup.
+ * Settings: person/pack switch, custom pack hot-load, guardian, backup & restore.
  * Pack / start-date changes require explicit confirmation to avoid silent remap.
  * @param props.api - DayGate API.
  */
@@ -14,16 +20,45 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
   const packFileRef = useRef<HTMLInputElement>(null);
   const packs = listPacksForPerson(api.state.personTypeId, api.state.customPacks);
   const [localMsg, setLocalMsg] = useState<string | null>(null);
+  const [banner, setBanner] = useState<{
+    tone: 'ok' | 'err' | 'info';
+    text: string;
+  } | null>(null);
+  const [importPreview, setImportPreview] = useState<{
+    preview: BackupPreview;
+    raw: string;
+  } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [showEmergency, setShowEmergency] = useState(false);
+  const [offerFolderAfterImport, setOfferFolderAfterImport] = useState(false);
 
+  const lastBackupLabel = (() => {
+    const at = api.state.lastBackupAt ?? api.state.lastFolderBackupAt;
+    if (!at) return '尚未备份';
+    const method =
+      api.state.lastBackupMethod === 'folder'
+        ? '已存到文件夹'
+        : api.state.lastBackupMethod === 'download'
+          ? '已下载文件'
+          : api.state.lastFolderBackupAt
+            ? '已存到文件夹'
+            : '已备份';
+    return `${method} · ${formatBackupTime(at)}`;
+  })();
+
+  /**
+   * Downloads current progress as a backup file and records the event.
+   */
   const download = () => {
-    const blob = new Blob([api.exportJson()], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `daygate-backup-${api.state.packId}-${api.state.startDate}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadBackupFile(
+      api.exportJson(),
+      `daygate-backup-${api.state.packId}-${api.state.startDate}.json`,
+    );
     api.markBackupExported();
+    setBanner({
+      tone: 'ok',
+      text: '备份文件已下载。可发给自己微信/网盘，换手机也能恢复。',
+    });
   };
 
   const downloadPack = () => {
@@ -67,14 +102,40 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
     if (ok) api.update({ startDate: nextDate });
   };
 
+  /**
+   * Applies a confirmed backup import and optionally offers folder auto-backup.
+   * @param raw - Validated backup JSON text.
+   */
+  const confirmImport = (raw: string) => {
+    try {
+      api.importJson(raw);
+      setImportPreview(null);
+      setImportError(null);
+      setBanner({
+        tone: 'ok',
+        text: '已恢复，可继续学习。当前本机进度已被这份备份覆盖。',
+      });
+      if (
+        api.folderBackupStatus.supported &&
+        !api.folderBackupStatus.hasFolder
+      ) {
+        setOfferFolderAfterImport(true);
+      }
+    } catch {
+      setBanner({
+        tone: 'err',
+        text: '恢复失败。请确认文件未损坏、未选错，然后重试。',
+      });
+    }
+  };
+
   return (
     <div className={`stack density-${api.person.uiDensity}`}>
       <section className="card stack">
         <div className="eyebrow">设置</div>
-        <h1>人员类型 · 课程包热加载 · 监护人</h1>
+        <h1>人员类型 · 课程包 · 监护人</h1>
         <p className="muted">
-          <strong>Local-only：</strong>
-          进度保存在本机浏览器 localStorage。清理站点数据、换浏览器或换设备可能导致丢失。请定期导出备份。
+          学习进度保存在本机浏览器。清缓存、换浏览器或换设备可能丢失，建议定期备份。
         </p>
 
         <label className="field">
@@ -166,9 +227,9 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
       </section>
 
       <section className="card stack">
-        <h2>自定义 Pack JSON 热加载</h2>
+        <h2>自定义课程包热加载</h2>
         <p className="muted">
-          导入符合 CurriculumPack 结构的 JSON（需通过质量门禁）。示例见{' '}
+          导入符合结构的课程包文件（需通过质量门禁）。示例见{' '}
           <code>public/examples/sample-custom-pack.json</code>
         </p>
         <div className="meta-row">
@@ -177,13 +238,17 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             type="button"
             onClick={() => packFileRef.current?.click()}
           >
-            导入 Pack JSON
+            导入课程包
           </button>
           <button className="btn secondary" type="button" onClick={downloadPack}>
-            导出当前 Pack
+            导出当前课程包
           </button>
-          <a className="btn ghost" href={`${import.meta.env.BASE_URL}examples/sample-custom-pack.json`} download>
-            下载示例 Pack
+          <a
+            className="btn ghost"
+            href={`${import.meta.env.BASE_URL}examples/sample-custom-pack.json`}
+            download
+          >
+            下载示例
           </a>
         </div>
         <input
@@ -199,7 +264,7 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             setLocalMsg(
               ok
                 ? api.packImportMessage
-                : api.packImportMessage ?? '导入失败，请检查 JSON 与质量规则',
+                : api.packImportMessage ?? '导入失败，请检查文件与质量规则',
             );
             e.target.value = '';
           }}
@@ -216,7 +281,7 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
                   className="btn ghost"
                   type="button"
                   onClick={() => {
-                    if (confirm(`移除自定义 Pack「${p.title}」？`)) {
+                    if (confirm(`移除自定义课程包「${p.title}」？`)) {
                       api.removeCustomPack(p.id);
                     }
                   }}
@@ -227,7 +292,7 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             ))}
           </ul>
         ) : (
-          <p className="muted">暂无自定义 Pack</p>
+          <p className="muted">暂无自定义课程包</p>
         )}
       </section>
 
@@ -261,162 +326,341 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
         </div>
       </section>
 
-      <section className="card stack">
-        <h2>备份</h2>
+      {/* —— Backup & restore (product-facing) —— */}
+      <section className="card stack backup-hub" data-testid="backup-hub">
+        <div className="eyebrow">备份与恢复</div>
+        <h2>保护学习进度</h2>
         <p className="muted">
-          每次保存都会写入主存储 + 镜像副本（daygate-v3-mirror）。若主数据异常，可尝试从镜像恢复。
+          <strong>备份</strong>用来防丢；
+          <strong>恢复</strong>用来找回来；
+          <strong>自动存到文件夹</strong>让本机更省心。三者各管一件事。
+        </p>
+        <p className="backup-status-line">
+          上次备份：{lastBackupLabel}
         </p>
 
-        <h3>文件夹自动备份</h3>
-        {!api.folderBackupStatus.supported ? (
-          <p className="muted">
-            当前浏览器不支持「选文件夹备份」（需 Chrome / Edge 等支持 File System Access
-            API）。请继续使用下方「导出备份 JSON」。
-          </p>
-        ) : (
-          <>
-            <p className="muted">
-              {api.folderBackupStatus.hasFolder
-                ? `已选择文件夹：${api.folderBackupStatus.folderName ?? '（已授权）'}`
-                : '尚未选择备份文件夹。选定后，验收通过（pass/partial）与门禁 Pass 时会自动写入。'}
+        {banner ? (
+          <div
+            className={`feedback-banner feedback-${banner.tone}`}
+            role="status"
+          >
+            {banner.text}
+          </div>
+        ) : null}
+
+        {offerFolderAfterImport ? (
+          <div className="feedback-banner feedback-info stack">
+            <strong>要不要顺便开启「自动存到文件夹」？</strong>
+            <p className="muted" style={{ margin: 0 }}>
+              选一个本机文件夹后，以后通过门禁时会自动再存一份，更省心。
             </p>
-            <p className="muted">
-              上次成功备份：
-              {api.state.lastFolderBackupAt
-                ? new Date(api.state.lastFolderBackupAt).toLocaleString('zh-CN')
-                : '尚无'}
-            </p>
-            {api.folderBackupStatus.hasFolder &&
-            api.folderBackupStatus.permission === 'prompt' ? (
-              <p className="muted">
-                权限需重新确认：下次备份或点击「立即备份到文件夹」时会弹出授权。
-              </p>
-            ) : null}
-            {api.folderBackupStatus.hasFolder &&
-            api.folderBackupStatus.permission === 'denied' ? (
-              <p className="muted">
-                写入权限已被拒绝，请重新选择备份文件夹并允许访问。
-              </p>
-            ) : null}
-            <div className="meta-row">
+            <div className="meta-row" style={{ margin: 0 }}>
               <button
                 className="btn"
                 type="button"
                 disabled={api.folderBackupBusy}
-                onClick={() => void api.selectBackupFolder()}
+                onClick={() => {
+                  void (async () => {
+                    const ok = await api.selectBackupFolder();
+                    if (ok) {
+                      await api.backupToFolderNow();
+                      setOfferFolderAfterImport(false);
+                      setBanner({
+                        tone: 'ok',
+                        text: '已选文件夹并完成一次备份。',
+                      });
+                    }
+                  })();
+                }}
               >
                 选择备份文件夹
               </button>
               <button
-                className="btn secondary"
+                className="btn ghost"
                 type="button"
-                disabled={
-                  api.folderBackupBusy || !api.folderBackupStatus.hasFolder
-                }
-                onClick={() => void api.backupToFolderNow()}
+                onClick={() => setOfferFolderAfterImport(false)}
               >
-                立即备份到文件夹
+                先不用
               </button>
-              {api.folderBackupStatus.hasFolder ? (
+            </div>
+          </div>
+        ) : null}
+
+        {/* 1. Protect progress (folder) */}
+        <div className="backup-block stack">
+          <h3>1. 保护进度（推荐）</h3>
+          <p className="muted">
+            选一个本机文件夹，通过门禁时自动再存一份。适合一直用同一台电脑 / Chrome
+            或 Edge。
+          </p>
+          {!api.folderBackupStatus.supported ? (
+            <p className="muted">
+              当前浏览器不支持「自动存到文件夹」。请用下方「下载备份文件」，或改用
+              Chrome / Edge。
+            </p>
+          ) : (
+            <>
+              <p className="muted">
+                {api.folderBackupStatus.hasFolder
+                  ? `已选文件夹：${api.folderBackupStatus.folderName ?? '（已授权）'}`
+                  : '尚未选择备份文件夹。'}
+              </p>
+              <p className="muted">
+                文件夹上次成功：
+                {formatBackupTime(api.state.lastFolderBackupAt)}
+              </p>
+              {api.folderBackupStatus.hasFolder &&
+              api.folderBackupStatus.permission === 'prompt' ? (
+                <p className="muted">
+                  需要重新允许访问：下次备份或点「立即备份」时会弹出提示。
+                </p>
+              ) : null}
+              {api.folderBackupStatus.hasFolder &&
+              api.folderBackupStatus.permission === 'denied' ? (
+                <p className="muted">
+                  写入权限已被拒绝，请重新选择文件夹并允许访问。
+                </p>
+              ) : null}
+              <div className="meta-row">
+                <button
+                  className="btn"
+                  type="button"
+                  disabled={api.folderBackupBusy}
+                  onClick={() => void api.selectBackupFolder()}
+                >
+                  {api.folderBackupStatus.hasFolder
+                    ? '更换备份文件夹'
+                    : '选择备份文件夹'}
+                </button>
+                <button
+                  className="btn secondary"
+                  type="button"
+                  disabled={
+                    api.folderBackupBusy || !api.folderBackupStatus.hasFolder
+                  }
+                  onClick={() => {
+                    void (async () => {
+                      const ok = await api.backupToFolderNow();
+                      if (ok) {
+                        setBanner({
+                          tone: 'ok',
+                          text: '已备份到文件夹。',
+                        });
+                      }
+                    })();
+                  }}
+                >
+                  立即备份
+                </button>
+                {api.folderBackupStatus.hasFolder ? (
+                  <button
+                    className="btn ghost"
+                    type="button"
+                    disabled={api.folderBackupBusy}
+                    onClick={() => {
+                      if (
+                        confirm(
+                          '清除已选备份文件夹？（不会删除电脑上已有的备份文件）',
+                        )
+                      ) {
+                        void api.clearBackupFolder();
+                      }
+                    }}
+                  >
+                    清除所选文件夹
+                  </button>
+                ) : null}
+              </div>
+              {api.folderBackupError ? (
+                <p className="muted" role="alert">
+                  {api.folderBackupError}
+                </p>
+              ) : null}
+              <p className="tech-note">
+                会写入「最新一份」与「按日期的副本」到所选文件夹；授权信息保存在本机，不会上传。
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* 2. Download */}
+        <div className="backup-block stack">
+          <h3>2. 下载一份备份</h3>
+          <p className="muted">
+            发给自己微信 / 网盘，换手机、换电脑也能用。
+          </p>
+          <div className="meta-row">
+            <button className="btn" type="button" onClick={download}>
+              下载备份文件
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Restore from file */}
+        <div className="backup-block stack">
+          <h3>3. 从备份恢复</h3>
+          <p className="muted">
+            新设备、清过缓存、或空白状态时，用之前下载 / 文件夹里的备份把进度找回来。
+          </p>
+          <div className="meta-row">
+            <button
+              className="btn"
+              type="button"
+              onClick={() => {
+                setImportError(null);
+                setImportPreview(null);
+                fileRef.current?.click();
+              }}
+            >
+              从备份文件恢复
+            </button>
+          </div>
+
+          {importError ? (
+            <div className="feedback-banner feedback-err" role="alert">
+              <strong>恢复失败</strong>
+              <p style={{ margin: '8px 0 0' }}>{importError}</p>
+              <p className="muted" style={{ margin: '8px 0 0' }}>
+                下一步：确认选的是本应用的备份文件；若仍失败，可展开下方「本机急救」试试浏览器副本。
+              </p>
+            </div>
+          ) : null}
+
+          {importPreview ? (
+            <div className="import-preview stack" data-testid="import-preview">
+              <strong>请确认要恢复的内容</strong>
+              <ul className="import-preview-list">
+                <li>姓名：{importPreview.preview.displayName}</li>
+                <li>课程包：{importPreview.preview.packId}</li>
+                <li>开营日：{importPreview.preview.startDate}</li>
+                <li>打卡条数：{importPreview.preview.checkInCount}</li>
+                <li>
+                  最后活动：
+                  {formatBackupTime(
+                    importPreview.preview.lastActivityAt,
+                    '无打卡记录',
+                  )}
+                </li>
+              </ul>
+              <p className="warn-line">
+                将覆盖当前本机进度。确认后无法用「撤销」自动回到现在这一版（除非你另有备份）。
+              </p>
+              <div className="meta-row">
+                <button
+                  className="btn"
+                  type="button"
+                  onClick={() => confirmImport(importPreview.raw)}
+                >
+                  确认恢复
+                </button>
                 <button
                   className="btn ghost"
                   type="button"
-                  disabled={api.folderBackupBusy}
-                  onClick={() => {
-                    if (confirm('清除已选备份文件夹？（不会删除磁盘上的备份文件）')) {
-                      void api.clearBackupFolder();
-                    }
-                  }}
+                  onClick={() => setImportPreview(null)}
                 >
-                  清除所选文件夹
+                  取消
                 </button>
-              ) : null}
+              </div>
             </div>
-            {api.folderBackupError ? (
-              <p className="muted" role="alert">
-                {api.folderBackupError}
-              </p>
-            ) : null}
-            <p className="muted">
-              写入文件：<code>daygate-backup-latest.json</code>
-              （覆盖）以及当日副本{' '}
-              <code>daygate-backup-YYYY-MM-DD.json</code>。句柄保存在 IndexedDB，不会进入
-              localStorage。
-            </p>
-          </>
-        )}
+          ) : null}
 
-        <h3>手动 JSON 导出 / 导入</h3>
-        <p className="muted">
-          与文件夹备份相互独立：换机、不支持选文件夹的浏览器，或需要分享进度时，请用导出
-          JSON。
-        </p>
-        <div className="meta-row">
-          <button className="btn" type="button" onClick={download}>
-            导出备份 JSON
-          </button>
-          <button
-            className="btn secondary"
-            type="button"
-            onClick={() => fileRef.current?.click()}
-          >
-            导入备份
-          </button>
-          <button
-            className="btn secondary"
-            type="button"
-            onClick={() => {
-              const ok = api.restoreFromMirror();
-              setLocalMsg(ok ? '已从镜像恢复' : '未找到可用镜像');
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            data-testid="backup-file-input"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try {
+                const text = await file.text();
+                const result = parseBackupPreview(text);
+                if (!result.ok) {
+                  setImportPreview(null);
+                  setImportError(result.message);
+                } else {
+                  setImportError(null);
+                  setImportPreview({
+                    preview: result.preview,
+                    raw: result.raw,
+                  });
+                }
+              } catch {
+                setImportPreview(null);
+                setImportError(
+                  '无法读取文件。请换一份备份再试，或确认文件未损坏。',
+                );
+              }
+              e.target.value = '';
             }}
-          >
-            从镜像恢复
-          </button>
+          />
+        </div>
+
+        {/* 4. Emergency / reset */}
+        <div className="backup-block stack">
+          <h3>4. 本机急救</h3>
           <button
             className="btn ghost"
             type="button"
-            onClick={() => {
-              if (confirm('确认清空全部本地进度？')) api.resetAll();
-            }}
+            onClick={() => setShowEmergency((v) => !v)}
           >
-            重置
+            {showEmergency ? '收起急救选项' : '展开急救选项（少用）'}
           </button>
+          {showEmergency ? (
+            <>
+              <p className="muted">
+                浏览器里通常还会留一份自动副本。主进度异常时，可尝试找回。
+              </p>
+              <div className="meta-row">
+                <button
+                  className="btn secondary"
+                  type="button"
+                  data-testid="restore-browser-copy"
+                  onClick={() => {
+                    const ok = api.restoreFromMirror();
+                    setBanner(
+                      ok
+                        ? {
+                            tone: 'ok',
+                            text: '已从浏览器副本找回，可继续学习。',
+                          }
+                        : {
+                            tone: 'err',
+                            text: '未找到可用的浏览器副本。请改用「从备份文件恢复」。',
+                          },
+                    );
+                  }}
+                >
+                  尝试从浏览器副本找回
+                </button>
+                <button
+                  className="btn ghost"
+                  type="button"
+                  onClick={() => {
+                    const ok = window.confirm(
+                      '确认清空全部本地进度？\n\n' +
+                        '此操作不可撤销。清空后需重新开营，或从备份文件恢复。' +
+                        '建议先「下载备份文件」再重置。',
+                    );
+                    if (ok) {
+                      api.resetAll();
+                      setBanner({
+                        tone: 'info',
+                        text: '已清空本机进度。可重新开营，或从备份文件恢复。',
+                      });
+                    }
+                  }}
+                >
+                  重置全部进度
+                </button>
+              </div>
+              <p className="tech-note">
+                技术说明：副本键名 daygate-v3-mirror；与文件夹备份相互独立。
+              </p>
+            </>
+          ) : null}
         </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="application/json"
-          hidden
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            try {
-              const text = await file.text();
-              const parsed = JSON.parse(text) as {
-                displayName?: string;
-                packId?: string;
-                checkIns?: Record<string, unknown>;
-              };
-              const passHint = parsed.checkIns
-                ? Object.keys(parsed.checkIns).length
-                : 0;
-              const ok = window.confirm(
-                `导入备份？\n\n姓名：${parsed.displayName ?? '（未知）'}\n` +
-                  `课程包：${parsed.packId ?? '（未知）'}\n打卡记录数：${passHint}\n\n` +
-                  '将覆盖当前本地进度。',
-              );
-              if (!ok) {
-                e.target.value = '';
-                return;
-              }
-              api.importJson(text);
-              setLocalMsg('备份导入成功');
-            } catch {
-              setLocalMsg('备份导入失败：JSON 无法解析');
-            }
-            e.target.value = '';
-          }}
-        />
       </section>
     </div>
   );

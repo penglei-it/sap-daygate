@@ -102,6 +102,8 @@ export function useDayGate() {
         setState((s) => ({
           ...s,
           lastFolderBackupAt: at,
+          lastBackupAt: at,
+          lastBackupMethod: 'folder',
           backupReminderPending: options?.clearReminder
             ? false
             : s.backupReminderPending,
@@ -391,7 +393,18 @@ export function useDayGate() {
   }, []);
 
   const markBackupExported = useCallback(() => {
-    setState((s) => ({ ...s, backupReminderPending: false }));
+    const at = new Date().toISOString();
+    setState((s) => ({
+      ...s,
+      backupReminderPending: false,
+      lastBackupAt: at,
+      lastBackupMethod: 'download',
+    }));
+  }, []);
+
+  /** Dismisses the soft “never backed up” tip on Today. */
+  const dismissBackupSoftTip = useCallback(() => {
+    setState((s) => ({ ...s, backupSoftTipDismissed: true }));
   }, []);
 
   /**
@@ -505,6 +518,7 @@ export function useDayGate() {
     setCompanionNote,
     dismissBackupReminder,
     markBackupExported,
+    dismissBackupSoftTip,
     selectBackupFolder,
     backupToFolderNow,
     clearBackupFolder,

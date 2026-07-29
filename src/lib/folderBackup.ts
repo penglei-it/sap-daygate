@@ -67,7 +67,7 @@ export function formatFolderBackupError(err: unknown): string {
   }
   if (message) return `备份失败：${message}`;
   if (!isFolderBackupSupported()) {
-    return '当前浏览器不支持选文件夹备份。请使用 Chrome/Edge，或改用「导出备份 JSON」。';
+    return '当前浏览器不支持选文件夹备份。请使用 Chrome/Edge，或改用「下载备份文件」。';
   }
   return '备份失败：无法写入所选文件夹';
 }
@@ -205,13 +205,13 @@ export async function ensureDirectoryPermission(
 export async function pickBackupFolder(): Promise<FileSystemDirectoryHandle> {
   if (!isFolderBackupSupported()) {
     throw new Error(
-      '当前浏览器不支持选文件夹备份。请使用 Chrome/Edge，或改用「导出备份 JSON」。',
+      '当前浏览器不支持选文件夹备份。请使用 Chrome/Edge，或改用「下载备份文件」。',
     );
   }
   const picker = window.showDirectoryPicker;
   if (typeof picker !== 'function') {
     throw new Error(
-      '当前浏览器不支持选文件夹备份。请使用 Chrome/Edge，或改用「导出备份 JSON」。',
+      '当前浏览器不支持选文件夹备份。请使用 Chrome/Edge，或改用「下载备份文件」。',
     );
   }
   const handle = await picker.call(window, {

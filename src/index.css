@@ -383,3 +383,104 @@ h3 {
 .chip.practice { background: #e7f0ff; border-color: #b7c9ef; }
 .chip.admin { background: #f3efe6; border-color: #d4ccbe; }
 .chip.review { background: #eef6f1; border-color: #b7d8cf; }
+
+/* Backup & restore product surfaces */
+.backup-hub h2 {
+  margin-bottom: 4px;
+}
+
+.backup-status-line {
+  margin: 0;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.backup-block {
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--line);
+}
+
+.backup-block h3 {
+  margin-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.tech-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
+
+.feedback-banner {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+
+.feedback-ok {
+  background: #e8f3ef;
+  border-color: #b9d9cf;
+  color: var(--pass);
+  font-weight: 600;
+}
+
+.feedback-err {
+  background: #f8ecea;
+  border-color: #e5b7ae;
+  color: var(--fail);
+}
+
+.feedback-info {
+  background: #fff8ec;
+  border-color: #e2c9a0;
+}
+
+.import-preview {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2c9a0;
+  background: #fff8ec;
+}
+
+.import-preview-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.import-preview-list li + li {
+  margin-top: 4px;
+}
+
+.warn-line {
+  margin: 0;
+  color: var(--fail);
+  font-weight: 600;
+}
+
+.soft-tip {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed #b7d8cf;
+  background: #f3faf7;
+}
+
+.backup-nudge {
+  border-color: #b7d8cf;
+  background: linear-gradient(180deg, #f5fbf8 0%, var(--card) 100%);
+}
+
+.restore-entry {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f7f3eb;
+  border: 1px solid var(--line);
+}
+
+.onboarding-divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 4px 0;
+}
+

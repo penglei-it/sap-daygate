@@ -19,14 +19,19 @@ test.describe('DayGate smoke', () => {
     await expect(page.getByText('成果验收测试')).toBeVisible();
   });
 
-  test('settings exposes local-only risk copy', async ({ page }) => {
+  test('settings exposes backup hub and browser-copy restore', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.clear();
     });
     await page.goto('/');
     await page.getByTestId('start-day-1').click();
     await page.getByRole('link', { name: '设置' }).click();
-    await expect(page.getByText('Local-only')).toBeVisible();
-    await expect(page.getByRole('button', { name: '从镜像恢复' })).toBeVisible();
+    await expect(page.getByTestId('backup-hub')).toBeVisible();
+    await expect(page.getByText('保护学习进度')).toBeVisible();
+    await expect(page.getByRole('button', { name: '下载备份文件' })).toBeVisible();
+    await page.getByText(/展开急救选项/).click();
+    await expect(
+      page.getByRole('button', { name: '尝试从浏览器副本找回' }),
+    ).toBeVisible();
   });
 });

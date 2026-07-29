@@ -28,6 +28,9 @@ export function createDefaultState(): UserState {
     companionNotes: {},
     backupReminderPending: false,
     lastFolderBackupAt: undefined,
+    lastBackupAt: undefined,
+    lastBackupMethod: undefined,
+    backupSoftTipDismissed: false,
     schemaVersion: 3,
   };
 }
@@ -68,6 +71,16 @@ export function loadState(): UserState {
         typeof parsed.lastFolderBackupAt === 'string'
           ? parsed.lastFolderBackupAt
           : undefined,
+      lastBackupAt:
+        typeof parsed.lastBackupAt === 'string'
+          ? parsed.lastBackupAt
+          : undefined,
+      lastBackupMethod:
+        parsed.lastBackupMethod === 'download' ||
+        parsed.lastBackupMethod === 'folder'
+          ? parsed.lastBackupMethod
+          : undefined,
+      backupSoftTipDismissed: Boolean(parsed.backupSoftTipDismissed),
       schemaVersion: 3,
       personTypeId: parsed.personTypeId ?? base.personTypeId,
       packId: parsed.packId ?? base.packId,

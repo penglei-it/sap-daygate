@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <h1>页面出错了</h1>
             <p className="muted">{this.state.message}</p>
             <p className="muted">
-              你的本地进度通常仍在浏览器中。可尝试刷新；若持续失败，请到设置导出备份后再重置。
+              你的本地进度通常仍在浏览器中。可尝试刷新；若持续失败，请到设置下载备份后再重置。
             </p>
             <button
               className="btn"

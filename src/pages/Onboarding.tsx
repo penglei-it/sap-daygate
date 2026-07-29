@@ -1,14 +1,20 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { PERSON_TYPES } from '../core/personTypes';
 import type { DayGateApi } from '../hooks/useDayGate';
+import {
+  formatBackupTime,
+  parseBackupPreview,
+  type BackupPreview,
+} from '../lib/backupPreview';
 import { getPack, listPacksForPerson } from '../packs';
 import type { PersonTypeId, UserState } from '../types/curriculum';
 
 /**
- * First-run setup: person type, pack, options.
+ * First-run setup: person type, pack, options, or restore-from-backup entry.
  * @param props.api - DayGate API.
  */
 export function Onboarding({ api }: { api: DayGateApi }) {
+  const restoreRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState('学习者');
   const [startDate, setStartDate] = useState(api.state.startDate);
   const [personTypeId, setPersonTypeId] =
@@ -27,6 +33,11 @@ export function Onboarding({ api }: { api: DayGateApi }) {
     () => Object.fromEntries((pack.optionFields ?? []).map((f) => [f.id, f.defaultValue])),
   );
   const [disableCert, setDisableCert] = useState(false);
+  const [restorePreview, setRestorePreview] = useState<{
+    preview: BackupPreview;
+    raw: string;
+  } | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
 
   const onPersonChange = (id: PersonTypeId) => {
     setPersonTypeId(id);
@@ -58,6 +69,113 @@ export function Onboarding({ api }: { api: DayGateApi }) {
           支持不同年龄与精力画像，课程以可替换的 Pack 提供：技能 / 考试 / 任务。
           验收通过才算完成，不只是打卡。
         </p>
+
+        <div className="restore-entry stack">
+          <p className="muted" style={{ margin: 0 }}>
+            换了手机、清过缓存，或已有备份？
+          </p>
+          <div className="meta-row" style={{ margin: 0 }}>
+            <button
+              className="btn secondary"
+              type="button"
+              data-testid="onboarding-restore"
+              onClick={() => {
+                setRestoreError(null);
+                setRestorePreview(null);
+                restoreRef.current?.click();
+              }}
+            >
+              我有备份，直接恢复
+            </button>
+          </div>
+          {restoreError ? (
+            <div className="feedback-banner feedback-err" role="alert">
+              {restoreError}
+            </div>
+          ) : null}
+          {restorePreview ? (
+            <div className="import-preview stack" data-testid="onboarding-import-preview">
+              <strong>确认恢复这份进度？</strong>
+              <ul className="import-preview-list">
+                <li>姓名：{restorePreview.preview.displayName}</li>
+                <li>课程包：{restorePreview.preview.packId}</li>
+                <li>开营日：{restorePreview.preview.startDate}</li>
+                <li>打卡条数：{restorePreview.preview.checkInCount}</li>
+                <li>
+                  最后活动：
+                  {formatBackupTime(
+                    restorePreview.preview.lastActivityAt,
+                    '无打卡记录',
+                  )}
+                </li>
+              </ul>
+              <p className="warn-line">将覆盖当前本机内容，然后直接进入学习。</p>
+              <div className="meta-row">
+                <button
+                  className="btn"
+                  type="button"
+                  onClick={() => {
+                    try {
+                      // Ensure restore from empty onboarding always enters the app.
+                      const parsed = JSON.parse(restorePreview.raw) as Record<
+                        string,
+                        unknown
+                      >;
+                      parsed.onboardingDone = true;
+                      api.importJson(JSON.stringify(parsed));
+                      setRestorePreview(null);
+                    } catch {
+                      setRestoreError(
+                        '恢复失败。请确认文件未损坏、未选错，然后重试。',
+                      );
+                    }
+                  }}
+                >
+                  确认恢复并进入
+                </button>
+                <button
+                  className="btn ghost"
+                  type="button"
+                  onClick={() => setRestorePreview(null)}
+                >
+                  取消
+                </button>
+              </div>
+            </div>
+          ) : null}
+          <input
+            ref={restoreRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try {
+                const text = await file.text();
+                const result = parseBackupPreview(text);
+                if (!result.ok) {
+                  setRestorePreview(null);
+                  setRestoreError(result.message);
+                } else {
+                  setRestoreError(null);
+                  setRestorePreview({
+                    preview: result.preview,
+                    raw: result.raw,
+                  });
+                }
+              } catch {
+                setRestorePreview(null);
+                setRestoreError(
+                  '无法读取文件。请换一份备份再试，或确认文件未损坏。',
+                );
+              }
+              e.target.value = '';
+            }}
+          />
+        </div>
+
+        <hr className="onboarding-divider" />
 
         <label className="field">
           怎么称呼你
@@ -91,7 +209,7 @@ export function Onboarding({ api }: { api: DayGateApi }) {
         </p>
 
         <label className="field">
-          课程包 Pack
+          课程包
           <select value={packId} onChange={(e) => onPackChange(e.target.value)}>
             {packs.map((p) => (
               <option key={p.id} value={p.id}>

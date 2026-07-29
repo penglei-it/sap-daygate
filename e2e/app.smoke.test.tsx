@@ -37,13 +37,18 @@ describe('app smoke (jsdom)', () => {
     expect(screen.getByText('成果验收测试')).toBeTruthy();
   });
 
-  it('settings shows local-only risk and mirror restore', async () => {
+  it('settings shows backup hub and browser-copy restore', async () => {
     const user = userEvent.setup();
     localStorage.clear();
     render(<Root />);
     await user.click(await screen.findByTestId('start-day-1'));
     await user.click(await screen.findByRole('link', { name: '设置' }));
-    expect(await screen.findByText(/Local-only/)).toBeTruthy();
-    expect(screen.getByText('从镜像恢复')).toBeTruthy();
+    expect(await screen.findByTestId('backup-hub')).toBeTruthy();
+    expect(screen.getByText(/保护学习进度/)).toBeTruthy();
+    expect(screen.getByText('下载备份文件')).toBeTruthy();
+    expect(screen.getByText('从备份文件恢复')).toBeTruthy();
+    await user.click(screen.getByText(/展开急救选项/));
+    expect(screen.getByTestId('restore-browser-copy')).toBeTruthy();
+    expect(screen.getByText('尝试从浏览器副本找回')).toBeTruthy();
   });
 });

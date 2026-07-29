@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { statusLabel } from '../core/acceptance';
 import type { DayGateApi } from '../hooks/useDayGate';
+import { downloadBackupFile } from '../lib/backupPreview';
 import { addDays } from '../lib/date';
 
 /**
- * Today hub: primary daily surface.
+ * Today hub: primary daily surface with backup reminders and soft tips.
  * @param props.api - DayGate API.
  */
 export function TodayPage({ api }: { api: DayGateApi }) {
@@ -19,16 +20,32 @@ export function TodayPage({ api }: { api: DayGateApi }) {
         ? '冲刺模式'
         : '标准模式';
 
+  const neverBackedUp = !state.lastBackupAt && !state.lastFolderBackupAt;
+  const showSoftBackupTip =
+    !state.backupReminderPending &&
+    neverBackedUp &&
+    !state.backupSoftTipDismissed &&
+    api.stats.pass >= 3;
+
+  /**
+   * Downloads a backup file and records the export timestamp.
+   */
+  const downloadNow = () => {
+    downloadBackupFile(
+      api.exportJson(),
+      `daygate-backup-${state.packId}-${state.startDate}.json`,
+    );
+    api.markBackupExported();
+  };
+
   return (
     <div className={`stack density-${person.uiDensity}`}>
       {state.backupReminderPending ? (
-        <section className="card stack">
-          <strong>备份提醒</strong>
+        <section className="card stack backup-nudge" data-testid="backup-gate-nudge">
+          <strong>建议马上备份一下</strong>
           <p className="muted">
-            你刚通过门禁。数据仅存本机浏览器，建议立即备份，降低清缓存/换机丢失风险。
-            {api.folderBackupStatus.hasFolder
-              ? ' 已配置备份文件夹时，系统也会尝试自动写入。'
-              : ''}
+            你刚通过一道重要关卡。进度只在这台设备的浏览器里，清缓存或换手机可能丢。
+            选一种方式存一份就安心了。
           </p>
           {api.folderBackupError ? (
             <p className="muted" role="alert">
@@ -36,6 +53,53 @@ export function TodayPage({ api }: { api: DayGateApi }) {
             </p>
           ) : null}
           <div className="meta-row">
+            {api.folderBackupStatus.supported ? (
+              <button
+                className="btn"
+                type="button"
+                disabled={api.folderBackupBusy}
+                onClick={() => {
+                  void (async () => {
+                    if (!api.folderBackupStatus.hasFolder) {
+                      const ok = await api.selectBackupFolder();
+                      if (!ok) return;
+                    }
+                    await api.backupToFolderNow();
+                  })();
+                }}
+              >
+                存到文件夹
+              </button>
+            ) : null}
+            <button
+              className={
+                api.folderBackupStatus.supported ? 'btn secondary' : 'btn'
+              }
+              type="button"
+              onClick={downloadNow}
+            >
+              下载备份文件
+            </button>
+            <button
+              className="btn ghost"
+              type="button"
+              onClick={() => api.dismissBackupReminder()}
+            >
+              稍后
+            </button>
+            <Link className="btn ghost" to="/settings">
+              打开备份设置
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      {showSoftBackupTip ? (
+        <section className="soft-tip stack" data-testid="backup-soft-tip">
+          <p style={{ margin: 0 }}>
+            已有 {api.stats.pass} 次通过，建议备份一次，避免清浏览器后丢进度。
+          </p>
+          <div className="meta-row" style={{ margin: 0 }}>
             {api.folderBackupStatus.supported &&
             api.folderBackupStatus.hasFolder ? (
               <button
@@ -44,39 +108,26 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                 disabled={api.folderBackupBusy}
                 onClick={() => void api.backupToFolderNow()}
               >
-                立即备份到文件夹
+                存到文件夹
               </button>
             ) : null}
-            <button
-              className={
-                api.folderBackupStatus.hasFolder ? 'btn secondary' : 'btn'
-              }
-              type="button"
-              onClick={() => {
-                const blob = new Blob([api.exportJson()], {
-                  type: 'application/json',
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `daygate-backup-${state.packId}-${state.startDate}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                api.markBackupExported();
-              }}
-            >
-              立即导出备份
+            <button className="btn secondary" type="button" onClick={downloadNow}>
+              下载备份文件
             </button>
+            <Link className="btn ghost" to="/settings">
+              备份设置
+            </Link>
             <button
-              className="btn secondary"
+              className="btn ghost"
               type="button"
-              onClick={() => api.dismissBackupReminder()}
+              onClick={() => api.dismissBackupSoftTip()}
             >
-              稍后提醒
+              关闭提示
             </button>
           </div>
         </section>
       ) : null}
+
       <div className="grid-2">
         <section className="card">
           <div className="eyebrow">

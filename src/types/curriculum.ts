@@ -184,6 +184,18 @@ export interface UserState {
    * Directory handles are stored in IndexedDB, not in this object.
    */
   lastFolderBackupAt?: string;
+  /**
+   * ISO timestamp of the last successful backup of any kind
+   * (download file or folder write).
+   */
+  lastBackupAt?: string;
+  /** How the last successful backup was made. */
+  lastBackupMethod?: 'download' | 'folder';
+  /**
+   * User dismissed the soft “please backup” tip on Today
+   * (shown when never backed up and enough Passes).
+   */
+  backupSoftTipDismissed?: boolean;
   /** Schema version for migrations. */
   schemaVersion: number;
 }
