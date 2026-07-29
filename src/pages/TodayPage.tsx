@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom';
 import { filterDays, statusLabel } from '../core/acceptance';
 import type { DayGateApi } from '../hooks/useDayGate';
 import { downloadBackupFile } from '../lib/backupPreview';
+import {
+  buildCatchUpQueue,
+  computeTodayMissed,
+  shouldShowStreakRecall,
+} from '../lib/coach';
 import { addDays } from '../lib/date';
 
 /**
@@ -32,6 +37,28 @@ export function TodayPage({ api }: { api: DayGateApi }) {
         ? `冲刺：已隐藏 side 侧支，列表可能变短。当前可见 ${visibleCount} 课（标准 ${standardCount} 课）。`
         : `标准：完整日课。当前可见 ${visibleCount} 课。`;
 
+  const { missedLast7 } = computeTodayMissed({
+    checkIns: state.checkIns,
+    packId: state.packId,
+    days: api.allDays,
+    startDate: state.startDate,
+    viewDate,
+  });
+
+  const showStreakRecall = shouldShowStreakRecall({
+    missedLast7,
+    mode: state.mode,
+    dismissedOnDate: state.streakRecallDismissedOn,
+    viewDate,
+  });
+
+  const catchUp = buildCatchUpQueue({
+    days: api.allDays,
+    packId: state.packId,
+    checkIns: state.checkIns,
+    maxItems: 5,
+  });
+
   const neverBackedUp = !state.lastBackupAt && !state.lastFolderBackupAt;
   const showSoftBackupTip =
     !state.backupReminderPending &&
@@ -56,6 +83,38 @@ export function TodayPage({ api }: { api: DayGateApi }) {
 
   return (
     <div className={`stack density-${person.uiDensity}`}>
+      {showStreakRecall ? (
+        <section className="soft-tip stack" data-testid="streak-recall">
+          <p style={{ margin: 0 }}>
+            近 7 天有 <strong>{missedLast7}</strong> 天中断。没关系——先用保底 15
+            分钟把链条接上就好。
+          </p>
+          <div className="meta-row" style={{ margin: 0 }}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() =>
+                api.update({
+                  mode: 'minimum',
+                  streakRecallDismissedOn: viewDate,
+                })
+              }
+            >
+              一键切到保底
+            </button>
+            <button
+              className="btn ghost"
+              type="button"
+              onClick={() =>
+                api.update({ streakRecallDismissedOn: viewDate })
+              }
+            >
+              今天不再提醒
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       {showSuggested && suggested ? (
         <section className="soft-tip stack" data-testid="suggested-mode">
           <p style={{ margin: 0 }}>
@@ -284,7 +343,7 @@ export function TodayPage({ api }: { api: DayGateApi }) {
               )}
               <div className="meta-row">
                 <Link className="btn" to={`/task/${todayPlan.dayIndex}`} data-testid="enter-task">
-                  进入学习与验收
+                  开始本课
                 </Link>
               </div>
             </>
@@ -309,6 +368,27 @@ export function TodayPage({ api }: { api: DayGateApi }) {
           <p className="muted mode-explain" data-testid="mode-explain">
             {modeExplain}
           </p>
+
+          {catchUp.length > 0 ? (
+            <div data-testid="catch-up-queue">
+              <h3>补做 / 即将门禁</h3>
+              <ul className="action-list">
+                {catchUp.map((item) => (
+                  <li key={item.key}>
+                    <Link
+                      to={`/task/${item.dayIndex}`}
+                      onClick={() =>
+                        api.setViewDate(addDays(state.startDate, item.dateOffset))
+                      }
+                    >
+                      第 {item.dayIndex} 天 · {item.title}
+                    </Link>
+                    <span className="muted"> — {item.reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           {state.mode === 'minimum' ? (
             <div>

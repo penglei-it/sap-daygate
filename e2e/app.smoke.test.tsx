@@ -41,6 +41,7 @@ describe('app smoke (jsdom)', () => {
 
     expect(await screen.findByTestId('enter-task')).toBeTruthy();
     await user.click(screen.getByTestId('enter-task'));
+    await user.click(screen.getByRole('button', { name: '跳过计时，直接验收' }));
     expect(await screen.findByText('学习路径')).toBeTruthy();
     expect(screen.getByText('成果验收测试')).toBeTruthy();
   });

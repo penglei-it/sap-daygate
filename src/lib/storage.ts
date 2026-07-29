@@ -31,6 +31,7 @@ export function createDefaultState(): UserState {
     lastBackupAt: undefined,
     lastBackupMethod: undefined,
     backupSoftTipDismissed: false,
+    streakRecallDismissedOn: undefined,
     suggestedMode: undefined,
     schemaVersion: 3,
   };
@@ -82,6 +83,10 @@ export function loadState(): UserState {
           ? parsed.lastBackupMethod
           : undefined,
       backupSoftTipDismissed: Boolean(parsed.backupSoftTipDismissed),
+      streakRecallDismissedOn:
+        typeof parsed.streakRecallDismissedOn === 'string'
+          ? parsed.streakRecallDismissedOn
+          : undefined,
       suggestedMode:
         parsed.suggestedMode === 'standard' ||
         parsed.suggestedMode === 'minimum' ||

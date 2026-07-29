@@ -21,6 +21,7 @@ test.describe('DayGate smoke', () => {
     await expect(page.getByRole('navigation', { name: '主导航' })).toBeVisible();
     await expect(page.getByTestId('enter-task')).toBeVisible({ timeout: 15_000 });
     await page.getByTestId('enter-task').click();
+    await page.getByRole('button', { name: '跳过计时，直接验收' }).click();
     await expect(page.getByText('学习路径')).toBeVisible();
     await expect(page.getByText('成果验收测试')).toBeVisible();
   });

@@ -205,6 +205,10 @@ export interface UserState {
    */
   backupSoftTipDismissed?: boolean;
   /**
+   * ISO date (viewDate) when streak-break recall was dismissed; hide until next day.
+   */
+  streakRecallDismissedOn?: string;
+  /**
    * Mode suggested by guardian; learner can accept or dismiss on Today.
    */
   suggestedMode?: 'standard' | 'minimum' | 'sprint';
