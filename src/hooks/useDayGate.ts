@@ -509,9 +509,20 @@ export function useDayGate() {
     setViewDate(fresh.startDate);
   }, []);
 
+  /**
+   * Restores user state from backup JSON.
+   * Always forces onboardingDone so the app leaves the wizard and reaches Today.
+   * @param raw - Backup JSON text.
+   * @throws SyntaxError when JSON is invalid.
+   */
   const importJson = useCallback((raw: string) => {
     const parsed = JSON.parse(raw) as UserState;
-    setState({ ...createDefaultState(), ...parsed, schemaVersion: 3 });
+    setState({
+      ...createDefaultState(),
+      ...parsed,
+      schemaVersion: 3,
+      onboardingDone: true,
+    });
   }, []);
 
   const compatiblePacks = useMemo(
@@ -570,7 +581,10 @@ export function useDayGate() {
     resetAll,
     restoreFromMirror: () => {
       const ok = restoreFromMirror();
-      if (ok) setState(loadState());
+      if (ok) {
+        const loaded = loadState();
+        setState({ ...loaded, onboardingDone: true });
+      }
       return ok;
     },
     exportJson: () => exportStateJson(state),

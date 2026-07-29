@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PERSON_TYPES } from '../core/personTypes';
 import type { DayGateApi } from '../hooks/useDayGate';
 import {
@@ -7,6 +8,11 @@ import {
   parseBackupPreview,
   type BackupPreview,
 } from '../lib/backupPreview';
+import { generatePackSkeleton } from '../lib/packWizard';
+import {
+  defaultWeeklyPassGoal,
+  resolveWeeklyPassGoal,
+} from '../lib/weeklyGoal';
 import { listPacksForPerson } from '../packs';
 import type { PersonTypeId } from '../types/curriculum';
 
@@ -16,6 +22,7 @@ import type { PersonTypeId } from '../types/curriculum';
  * @param props.api - DayGate API.
  */
 export function SettingsPage({ api }: { api: DayGateApi }) {
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const packFileRef = useRef<HTMLInputElement>(null);
   const packs = listPacksForPerson(api.state.personTypeId, api.state.customPacks);
@@ -31,6 +38,17 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
   const [importError, setImportError] = useState<string | null>(null);
   const [showEmergency, setShowEmergency] = useState(false);
   const [offerFolderAfterImport, setOfferFolderAfterImport] = useState(false);
+  const [showPackWizard, setShowPackWizard] = useState(false);
+  const [wizardTitle, setWizardTitle] = useState('我的自定义课表');
+  const [wizardDays, setWizardDays] = useState(14);
+  const [wizardTemplate, setWizardTemplate] = useState('第{n}天：完成今日小目标');
+  const [wizardTwoGates, setWizardTwoGates] = useState(true);
+  const [wizardMsg, setWizardMsg] = useState<string | null>(null);
+
+  const weeklyGoal = resolveWeeklyPassGoal(
+    api.state.weeklyPassGoal,
+    api.state.personTypeId,
+  );
 
   const lastBackupLabel = (() => {
     const at = api.state.lastBackupAt ?? api.state.lastFolderBackupAt;
@@ -103,7 +121,7 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
   };
 
   /**
-   * Applies a confirmed backup import and optionally offers folder auto-backup.
+   * Applies a confirmed backup import, then navigates to Today.
    * @param raw - Validated backup JSON text.
    */
   const confirmImport = (raw: string) => {
@@ -115,18 +133,59 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
         tone: 'ok',
         text: '已恢复，可继续学习。当前本机进度已被这份备份覆盖。',
       });
+      try {
+        sessionStorage.setItem('daygate-restore-ok', '1');
+      } catch {
+        // ignore quota / private mode
+      }
       if (
         api.folderBackupStatus.supported &&
         !api.folderBackupStatus.hasFolder
       ) {
         setOfferFolderAfterImport(true);
       }
+      navigate('/');
     } catch {
       setBanner({
         tone: 'err',
         text: '恢复失败。请确认文件未损坏、未选错，然后重试。',
       });
     }
+  };
+
+  /**
+   * Runs the pack skeleton wizard and either downloads JSON or imports it.
+   * @param mode - download | import
+   */
+  const runPackWizard = (mode: 'download' | 'import') => {
+    const result = generatePackSkeleton({
+      title: wizardTitle,
+      dayCount: wizardDays,
+      titleTemplate: wizardTemplate,
+      includeTwoGates: wizardTwoGates,
+    });
+    if (!result.pack || !result.validation.ok) {
+      const first = result.validation.issues[0]?.message ?? '生成失败';
+      setWizardMsg(`无法生成：${first}`);
+      return;
+    }
+    if (mode === 'download') {
+      const blob = new Blob([result.json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${result.pack.id}.pack.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setWizardMsg(`已下载骨架「${result.pack.title}」。`);
+      return;
+    }
+    const ok = api.importCustomPack(result.json);
+    setWizardMsg(
+      ok
+        ? `已生成并导入：${result.pack.title}`
+        : api.packImportMessage ?? '导入失败',
+    );
   };
 
   return (
@@ -230,6 +289,30 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             <option value="yes">是</option>
           </select>
         </label>
+
+        <label className="field">
+          本周通过目标（天）
+          <input
+            type="number"
+            min={1}
+            max={14}
+            value={weeklyGoal}
+            data-testid="weekly-pass-goal"
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              if (!Number.isFinite(n)) return;
+              api.update({ weeklyPassGoal: Math.max(1, Math.min(14, Math.round(n))) });
+            }}
+          />
+        </label>
+        <p className="muted">
+          默认按人员类型约为{' '}
+          {defaultWeeklyPassGoal(api.state.personTypeId)}{' '}
+          天。今日页会显示「本周通过 x / 目标 N」。
+        </p>
+        <p className="muted">
+          可用浏览器「添加到主屏幕」，把日验装成离线壳应用（PWA）。
+        </p>
       </section>
 
       <section className="card stack">
@@ -245,6 +328,14 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             onClick={() => packFileRef.current?.click()}
           >
             导入课程包
+          </button>
+          <button
+            className="btn secondary"
+            type="button"
+            data-testid="open-pack-wizard"
+            onClick={() => setShowPackWizard((v) => !v)}
+          >
+            用向导生成骨架
           </button>
           <button className="btn secondary" type="button" onClick={downloadPack}>
             导出当前课程包
@@ -264,6 +355,61 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
             下载完整示例
           </a>
         </div>
+        {showPackWizard ? (
+          <div className="stack" data-testid="pack-wizard">
+            <label className="field">
+              课表标题
+              <input
+                value={wizardTitle}
+                onChange={(e) => setWizardTitle(e.target.value)}
+              />
+            </label>
+            <label className="field">
+              天数（14–21）
+              <input
+                type="number"
+                min={14}
+                max={21}
+                value={wizardDays}
+                onChange={(e) => setWizardDays(Number(e.target.value) || 14)}
+              />
+            </label>
+            <label className="field">
+              每日标题模板（用 {'{n}'} 表示第几天）
+              <input
+                value={wizardTemplate}
+                onChange={(e) => setWizardTemplate(e.target.value)}
+              />
+            </label>
+            <label className="field">
+              含 2 个门禁日
+              <select
+                value={wizardTwoGates ? 'yes' : 'no'}
+                onChange={(e) => setWizardTwoGates(e.target.value === 'yes')}
+              >
+                <option value="yes">是</option>
+                <option value="no">否（仅末日 1 个门禁）</option>
+              </select>
+            </label>
+            <div className="meta-row">
+              <button
+                className="btn"
+                type="button"
+                onClick={() => runPackWizard('import')}
+              >
+                生成并导入
+              </button>
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={() => runPackWizard('download')}
+              >
+                仅下载 JSON
+              </button>
+            </div>
+            {wizardMsg ? <p className="muted">{wizardMsg}</p> : null}
+          </div>
+        ) : null}
         <input
           ref={packFileRef}
           type="file"
@@ -685,6 +831,14 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
                             text: '未找到可用的浏览器副本。请改用「从备份文件恢复」。',
                           },
                     );
+                    if (ok) {
+                      try {
+                        sessionStorage.setItem('daygate-restore-ok', '1');
+                      } catch {
+                        // ignore
+                      }
+                      navigate('/');
+                    }
                   }}
                 >
                   尝试从浏览器副本找回

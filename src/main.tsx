@@ -10,6 +10,20 @@ import './index.css';
 const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
 
 /**
+ * Registers the offline shell service worker when supported.
+ * Failures are ignored so unsupported browsers stay usable.
+ */
+function registerServiceWorker(): void {
+  if (!('serviceWorker' in navigator)) return;
+  const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register(swUrl).catch(() => {
+      // Offline shell is optional; ignore registration errors.
+    });
+  });
+}
+
+/**
  * Root bridge so the DayGate hook owns a single source of truth.
  */
 function Root() {
@@ -20,6 +34,8 @@ function Root() {
     </BrowserRouter>
   );
 }
+
+registerServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

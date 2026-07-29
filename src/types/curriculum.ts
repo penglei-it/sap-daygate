@@ -212,6 +212,11 @@ export interface UserState {
    * Mode suggested by guardian; learner can accept or dismiss on Today.
    */
   suggestedMode?: 'standard' | 'minimum' | 'sprint';
+  /**
+   * Soft weekly Pass goal for the commitment bar on Today.
+   * When unset, a person-type default is used (typically 4 or 5).
+   */
+  weeklyPassGoal?: number;
   /** Schema version for migrations. */
   schemaVersion: number;
 }

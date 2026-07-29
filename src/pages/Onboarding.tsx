@@ -147,6 +147,11 @@ export function Onboarding({ api }: { api: DayGateApi }) {
                       >;
                       parsed.onboardingDone = true;
                       api.importJson(JSON.stringify(parsed));
+                      try {
+                        sessionStorage.setItem('daygate-restore-ok', '1');
+                      } catch {
+                        // ignore
+                      }
                       setRestorePreview(null);
                     } catch {
                       setRestoreError(

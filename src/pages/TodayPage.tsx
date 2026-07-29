@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { filterDays, statusLabel } from '../core/acceptance';
 import type { DayGateApi } from '../hooks/useDayGate';
@@ -8,6 +9,24 @@ import {
   shouldShowStreakRecall,
 } from '../lib/coach';
 import { addDays } from '../lib/date';
+import type { DayPlan } from '../types/curriculum';
+import {
+  countWeeklyPasses,
+  resolveWeeklyPassGoal,
+  weeklyGoalEncouragement,
+} from '../lib/weeklyGoal';
+
+/**
+ * Finds the next lesson in the pack by dateOffset+1, then dayIndex+1.
+ * @param today - Current mapped day plan.
+ * @param days - All scaled days in the active pack.
+ * @returns Next day plan or null when none.
+ */
+function findNextLesson(today: DayPlan, days: DayPlan[]): DayPlan | null {
+  const byOffset = days.find((d) => d.dateOffset === today.dateOffset + 1);
+  if (byOffset) return byOffset;
+  return days.find((d) => d.dayIndex === today.dayIndex + 1) ?? null;
+}
 
 /**
  * Today hub: primary daily surface with mode coaching and backup tips.
@@ -17,6 +36,29 @@ export function TodayPage({ api }: { api: DayGateApi }) {
   const { state, viewDate, setViewDate, todayPlan, minimumPool, offsetToday, pack, person } =
     api;
   const checkIn = todayPlan ? api.getCheckIn(todayPlan.dayIndex) : undefined;
+  const dayDone = checkIn?.status === 'pass';
+  const nextLesson = todayPlan ? findNextLesson(todayPlan, api.allDays) : null;
+  const weeklyGoal = resolveWeeklyPassGoal(state.weeklyPassGoal, state.personTypeId);
+  const weeklyPassCount = countWeeklyPasses({
+    checkIns: state.checkIns,
+    packId: state.packId,
+    days: api.allDays,
+    startDate: state.startDate,
+    viewDate,
+  });
+  const weeklyEncourage = weeklyGoalEncouragement(weeklyPassCount, weeklyGoal);
+  const [restoreTip, setRestoreTip] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('daygate-restore-ok') === '1') {
+        sessionStorage.removeItem('daygate-restore-ok');
+        setRestoreTip('已恢复，可继续学习。当前本机进度已被这份备份覆盖。');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const modeLabel =
     state.mode === 'minimum'
@@ -84,6 +126,16 @@ export function TodayPage({ api }: { api: DayGateApi }) {
 
   return (
     <div className={`stack density-${person.uiDensity}`}>
+      {restoreTip ? (
+        <section
+          className="feedback-banner feedback-ok"
+          role="status"
+          data-testid="restore-success"
+        >
+          {restoreTip}
+        </section>
+      ) : null}
+
       {showStreakRecall ? (
         <section className="soft-tip stack" data-testid="streak-recall">
           <p style={{ margin: 0 }}>
@@ -332,7 +384,19 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                   {api.state.companionNotes[`${state.packId}:${todayPlan.dayIndex}`]}
                 </p>
               ) : null}
-              {checkIn ? (
+              {dayDone ? (
+                <div className="done-today" data-testid="today-done">
+                  <h2 className="done-today-title">今日已完成</h2>
+                  <p className="muted">
+                    验收已通过。可以休息，或点「再看看」回顾本课。
+                  </p>
+                  {nextLesson ? (
+                    <p data-testid="tomorrow-preview">
+                      明日预告：{nextLesson.title}
+                    </p>
+                  ) : null}
+                </div>
+              ) : checkIn ? (
                 <p>
                   今日状态：{' '}
                   <span className={`status-${checkIn.status}`}>
@@ -346,15 +410,45 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                 <p className="muted">尚未验收</p>
               )}
               <div className="meta-row">
-                <Link className="btn" to={`/task/${todayPlan.dayIndex}`} data-testid="enter-task">
-                  进入今日课
-                </Link>
+                {dayDone ? (
+                  <Link
+                    className="btn secondary"
+                    to={`/task/${todayPlan.dayIndex}`}
+                    data-testid="enter-task"
+                  >
+                    再看看
+                  </Link>
+                ) : (
+                  <Link
+                    className="btn"
+                    to={`/task/${todayPlan.dayIndex}`}
+                    data-testid="enter-task"
+                  >
+                    进入今日课
+                  </Link>
+                )}
               </div>
             </>
           )}
         </section>
 
         <aside className="card stack">
+          <div data-testid="weekly-goal-bar">
+            <h3>本周承诺</h3>
+            <p style={{ margin: 0 }}>
+              本周通过 {weeklyPassCount} / 目标 {weeklyGoal}
+            </p>
+            {weeklyEncourage ? (
+              <p className="muted" style={{ margin: 0 }}>
+                {weeklyEncourage}
+              </p>
+            ) : (
+              <p className="muted" style={{ margin: 0 }}>
+                按自己的节奏推进即可，不追求一次做完。
+              </p>
+            )}
+          </div>
+
           <h3>学习模式</h3>
           <select
             value={state.mode}

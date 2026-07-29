@@ -2,7 +2,12 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { statusLabel } from '../core/acceptance';
 import type { DayGateApi } from '../hooks/useDayGate';
-import { addDays } from '../lib/date';
+import {
+  buildGuardianWeekCells,
+  buildGuardianWeeklyReportText,
+  copyTextToClipboard,
+  downloadTextFile,
+} from '../lib/guardianReport';
 
 /**
  * Guardian/companion dashboard: read-only progress + soft reminders.
@@ -14,33 +19,53 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
   const [pinError, setPinError] = useState<string | null>(null);
   /** Local feedback after suggesting minimum mode to the learner. */
   const [suggestSent, setSuggestSent] = useState(false);
+  /** Feedback after copying or downloading the weekly report. */
+  const [reportMsg, setReportMsg] = useState<string | null>(null);
   const noteKey = todayPlan ? `${state.packId}:${todayPlan.dayIndex}` : '';
   const [note, setNote] = useState(
     todayPlan ? state.companionNotes[noteKey] ?? '' : '',
   );
 
-  const recentCells = useMemo(() => {
-    const start = state.startDate;
-    return Array.from({ length: 7 }, (_, i) => {
-      const iso = addDays(api.viewDate, i - 6);
-      const offset =
-        Math.round(
-          (new Date(iso + 'T00:00:00').getTime() -
-            new Date(start + 'T00:00:00').getTime()) /
-            86_400_000,
-        );
-      const day = allDays.find((d) => d.dateOffset === offset);
-      const cin = day ? api.getCheckIn(day.dayIndex) : undefined;
-      return {
-        iso,
-        dayIndex: day?.dayIndex,
-        status: cin?.status,
-        title: day?.title ?? '无课',
-      };
-    });
-  }, [allDays, api, state.startDate]);
+  const recentCells = useMemo(
+    () =>
+      buildGuardianWeekCells({
+        viewDate: api.viewDate,
+        startDate: state.startDate,
+        days: allDays,
+        getCheckIn: api.getCheckIn,
+      }),
+    [allDays, api, state.startDate],
+  );
+
+  const weeklyReportText = useMemo(
+    () =>
+      buildGuardianWeeklyReportText({
+        summary: s,
+        weekCells: recentCells,
+      }),
+    [s, recentCells],
+  );
 
   const nextGate = api.stats.gates.find((g) => g.status !== 'pass');
+
+  /**
+   * Copies the weekly report to the clipboard.
+   */
+  const copyReport = async () => {
+    const ok = await copyTextToClipboard(weeklyReportText);
+    setReportMsg(ok ? '周报已复制到剪贴板。' : '复制失败，请改用下载。');
+  };
+
+  /**
+   * Downloads the weekly report as a .txt file.
+   */
+  const downloadReport = () => {
+    downloadTextFile(
+      weeklyReportText,
+      `daygate-week-report-${api.viewDate}.txt`,
+    );
+    setReportMsg('周报已开始下载。');
+  };
 
   return (
     <div className={`stack density-${person.uiDensity}`}>
@@ -71,6 +96,33 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
             <span className="muted">通过 / 总课</span>
           </div>
         </div>
+
+        <div className="meta-row">
+          <button
+            className="btn secondary"
+            type="button"
+            data-testid="copy-week-report"
+            onClick={() => void copyReport()}
+          >
+            复制周报
+          </button>
+          <button
+            className="btn ghost"
+            type="button"
+            data-testid="download-week-report"
+            onClick={downloadReport}
+          >
+            下载周报.txt
+          </button>
+        </div>
+        {reportMsg ? (
+          <p className="muted" role="status" data-testid="week-report-msg">
+            {reportMsg}
+          </p>
+        ) : null}
+        <p className="muted">
+          周报为近 7 日纯文本摘要，仅在本机复制或下载，不会上传。
+        </p>
       </section>
 
       <section className="card stack">

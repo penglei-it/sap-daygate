@@ -417,7 +417,39 @@ h3 {
 .density-roomy input,
 .density-roomy select,
 .density-roomy textarea {
-  padding: 12px 14px;
+  padding: 14px 18px;
+  font-size: 1.05rem;
+}
+
+.density-roomy .btn {
+  min-height: 48px;
+  font-weight: 600;
+}
+
+.density-roomy h1 {
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  line-height: 1.25;
+}
+
+.task-hero-roomy {
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.task-title-roomy {
+  margin-top: 12px;
+  margin-bottom: 16px;
+  letter-spacing: 0.01em;
+}
+
+.audience-roomy-task .btn {
+  min-height: 52px;
+  padding-inline: 20px;
+}
+
+.done-today-title {
+  margin: 8px 0 4px;
+  color: var(--pass);
 }
 
 .density-comfortable {

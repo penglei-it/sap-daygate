@@ -150,10 +150,21 @@ export function TaskPage({ api }: { api: DayGateApi }) {
   };
 
   const showAccept = phase === 'accept' || readOnly;
+  const roomyAudience =
+    api.person.id === 'child_primary' || api.person.id === 'teen_student';
+  /** Truncate long path step labels for younger audiences. */
+  const formatPathStep = (step: string) => {
+    if (!roomyAudience || step.length <= 42) return step;
+    return `${step.slice(0, 40)}…`;
+  };
 
   return (
-    <div className={`stack density-${api.person.uiDensity}`}>
-      <div className="card">
+    <div
+      className={`stack density-${api.person.uiDensity}${
+        roomyAudience ? ' audience-roomy-task' : ''
+      }`}
+    >
+      <div className={`card${roomyAudience ? ' task-hero-roomy' : ''}`}>
         <Link to="/">← 返回今天</Link>
         <div className="meta-row" style={{ marginTop: 12 }}>
           <span className={`chip ${plan.track}`}>{plan.track}</span>
@@ -164,7 +175,15 @@ export function TaskPage({ api }: { api: DayGateApi }) {
           {plan.gateId ? <span className="chip gate">{plan.gateId}</span> : null}
           {requireEvidence && <span className="chip">需证据</span>}
         </div>
-        <h1>{plan.title}</h1>
+        <h1 className={roomyAudience ? 'task-title-roomy' : undefined}>
+          {plan.title}
+        </h1>
+        {api.person.todayHint && roomyAudience ? (
+          <p className="person-hint">{api.person.todayHint}</p>
+        ) : null}
+        {api.person.companionHint && roomyAudience ? (
+          <p className="muted companion-hint">{api.person.companionHint}</p>
+        ) : null}
         <p>{plan.content}</p>
       </div>
 
@@ -216,7 +235,7 @@ export function TaskPage({ api }: { api: DayGateApi }) {
                   onChange={() => togglePath(idx)}
                 />
                 <span className="path-index">{idx + 1}</span>
-                <span>{step}</span>
+                <span title={step}>{formatPathStep(step)}</span>
               </li>
             ))}
           </ul>

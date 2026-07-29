@@ -33,6 +33,7 @@ export function createDefaultState(): UserState {
     backupSoftTipDismissed: false,
     streakRecallDismissedOn: undefined,
     suggestedMode: undefined,
+    weeklyPassGoal: undefined,
     schemaVersion: 3,
   };
 }
@@ -92,6 +93,11 @@ export function loadState(): UserState {
         parsed.suggestedMode === 'minimum' ||
         parsed.suggestedMode === 'sprint'
           ? parsed.suggestedMode
+          : undefined,
+      weeklyPassGoal:
+        typeof parsed.weeklyPassGoal === 'number' &&
+        Number.isFinite(parsed.weeklyPassGoal)
+          ? parsed.weeklyPassGoal
           : undefined,
       schemaVersion: 3,
       personTypeId: parsed.personTypeId ?? base.personTypeId,
