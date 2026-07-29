@@ -10,8 +10,8 @@ const TS_EVERYDAY = 'https://www.typescriptlang.org/docs/handbook/2/everyday-typ
  */
 export const skillTypescriptPack: CurriculumPack = {
   id: 'skill-typescript-basics',
-  version: '1.0.0',
-  title: 'TypeScript 基础 21 天',
+  version: '1.1.0',
+  title: 'TypeScript 基础 20 课',
   subtitle: '语法 → 小项目 → 可读类型',
   category: 'skill',
   locale: 'zh-CN',
@@ -22,7 +22,9 @@ export const skillTypescriptPack: CurriculumPack = {
     'career_switcher',
     'senior_learner',
   ],
-  summary: '适合从 JavaScript 过渡到 TypeScript 的通用技能包，强调可运行小练习与验收。',
+  summary:
+    '共 20 课，按连续日历日推进。适合从 JavaScript 过渡到 TypeScript 的通用技能包，强调可运行小练习与验收。',
+  optionalTracks: ['side'],
   phases: [
     { id: 'T1', name: 'JS现代基础', goal: '异步与模块过关', gateId: 'T-G1' },
     { id: 'T2', name: 'TS类型系统', goal: '日常类型熟练', gateId: 'T-G2' },
@@ -34,6 +36,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'JS现代基础',
       week: 1,
       title: '环境：Node/浏览器任选可运行',
+      estimatedMinutes: 40,
       content:
         '选一个可运行环境（Node 或浏览器控制台+本地 HTML）。今天目标是「改一行代码能立刻看到结果」，降低后续学习摩擦。',
       path: ['安装或确认运行环境', '运行 Hello', '记录启动命令', '建练习文件夹'],
@@ -53,6 +56,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'JS现代基础',
       week: 1,
       title: 'let/const、解构与模块',
+      estimatedMinutes: 55,
       content:
         '掌握现代绑定与模块导入导出，避免再写依赖全局变量的脚本。完成一个分成两个文件的小例子。',
       path: ['阅读 MDN 模块章节', '写两文件互调', '用 const 重构变量', '总结 5 条规范'],
@@ -70,6 +74,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'JS现代基础',
       week: 1,
       title: 'Promise 与 async/await',
+      estimatedMinutes: 60,
       content:
         '把回调心智升级为 Promise/async。写一个模拟延迟任务并正确处理成功与失败分支。',
       path: ['读 MDN Promise', '写 delay 函数', '写失败分支', '对比 then 与 await'],
@@ -90,6 +95,7 @@ export const skillTypescriptPack: CurriculumPack = {
       title: '门禁 T-G1：JS 现代基础验收',
       track: 'gate',
       gateId: 'T-G1',
+      estimatedMinutes: 50,
       content:
         '提交可运行仓库/文件夹：模块示例 + 异步示例 + README。证明你具备进入 TypeScript 的地板能力。',
       path: ['整理 README', '自测复现', '录 3 分钟讲解或写步骤', '提交证据路径'],
@@ -114,6 +120,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'TS类型系统',
       week: 2,
       title: '安装 TypeScript 并编译第一行',
+      estimatedMinutes: 45,
       content:
         '初始化 tsconfig，写第一个 .ts 文件并编译/运行。搞清 type check 与 emit 的基本关系。',
       path: ['安装 typescript', '写 tsconfig', '编译 Hello', '记录常用命令'],
@@ -133,6 +140,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'TS类型系统',
       week: 2,
       title: 'Everyday Types：原始类型与对象',
+      estimatedMinutes: 60,
       content:
         '练习 string/number/boolean/array/object 注解，体会类型缩小错误空间。完成 10 个小断言练习。',
       path: ['读 Everyday Types', '做 10 题练习', '故意写错看报错', '整理笔记'],
@@ -150,6 +158,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'TS类型系统',
       week: 2,
       title: '接口 interface 与类型别名',
+      estimatedMinutes: 55,
       content:
         '用 interface 描述数据结构，用 type 做联合/交叉入门。把一个 JSON 配置描述成类型。',
       path: ['定义 User 接口', '定义联合状态类型', '给配置文件加类型', '写 5 条选用原则'],
@@ -168,6 +177,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: 'TS类型系统',
       week: 2,
       title: '函数类型与泛型入门',
+      estimatedMinutes: 65,
       content:
         '为函数参数/返回值标注类型，并写一个最小泛型函数（如 identity 或 wrap）。理解泛型是「延迟决定类型」。',
       path: ['标注 3 个函数', '写 identity 泛型', '用在数组工具函数', '总结易错点'],
@@ -187,6 +197,7 @@ export const skillTypescriptPack: CurriculumPack = {
       title: '门禁 T-G2：类型系统小测',
       track: 'gate',
       gateId: 'T-G2',
+      estimatedMinutes: 55,
       content:
         '闭卷完成 8 题类型标注小测，并提交你的类型练习仓库。通过才进入小项目周。',
       path: ['做小测 8 题', '整理仓库', '写 README', '提交证据'],
@@ -207,10 +218,31 @@ export const skillTypescriptPack: CurriculumPack = {
       minimumMode: true,
     },
     {
+      phaseId: 'T2',
+      phaseName: 'TS类型系统',
+      week: 2,
+      title: '休息日：仅复习类型闪卡',
+      track: 'rest',
+      estimatedMinutes: 25,
+      content:
+        '类型门禁后的中段轻量日。只复习 interface/type/union/generics/async 闪卡，低强度保持记忆，再进入小项目周。',
+      path: ['过闪卡 15 分钟', '默写 5 个定义', '记录遗忘项'],
+      references: [ref('Everyday Types', TS_EVERYDAY)],
+      acceptanceCriteria: ['闪卡完成', '遗忘项记录'],
+      acceptanceTests: [
+        ['t46', 'union 是什么？', '正确'],
+        ['t47', 'generic 是什么？', '正确'],
+        ['t48', '遗忘项？', '列出或无'],
+      ],
+      deliverable: '闪卡日志',
+      minimumMode: true,
+    },
+    {
       phaseId: 'T3',
       phaseName: '小项目',
       week: 3,
       title: '立项：做一个命令行小工具',
+      estimatedMinutes: 45,
       content:
         '选定小工具主题（待办、单词本、番茄钟日志等），写清输入输出与非目标，避免做成大而无当。',
       path: ['选题', '写一页规格', '列非目标', '拆 3 日任务'],
@@ -228,8 +260,29 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseId: 'T3',
       phaseName: '小项目',
       week: 3,
+      title: '加餐：读一段开源 TS 类型',
+      track: 'side',
+      estimatedMinutes: 40,
+      content:
+        '中段侧支：阅读一个小型开源库的类型定义（或官方示例），记录 3 个看不懂后查懂的点，训练阅读真实代码能力。',
+      path: ['选仓库/示例', '读类型定义', '记录 3 个疑问与答案', '分享笔记'],
+      references: [
+        ref('TypeScript Examples', 'https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html'),
+      ],
+      acceptanceCriteria: ['3 个疑问闭环', '笔记可分享'],
+      acceptanceTests: [
+        ['t34', '读的是什么？', '指出'],
+        ['t35', '一个疑问？', '说出'],
+        ['t36', '答案来源？', '文档/推断'],
+      ],
+      deliverable: '阅读笔记',
+    },
+    {
+      phaseId: 'T3',
+      phaseName: '小项目',
+      week: 3,
       title: '实现核心路径（可读类型）',
-      estimatedMinutes: 90,
+      estimatedMinutes: 95,
       content:
         '实现主路径，类型要表达业务状态，而不是 any 逃生。保证至少一条完整用户故事可跑通。',
       path: ['建模型类型', '实现主流程', '去掉 any', '手工测试 3 案'],
@@ -248,6 +301,7 @@ export const skillTypescriptPack: CurriculumPack = {
       phaseName: '小项目',
       week: 3,
       title: '错误处理与 README',
+      estimatedMinutes: 55,
       content:
         '补齐失败路径与使用说明，让陌生人能按 README 在 5 分钟内跑起来。这是作品集门禁的关键。',
       path: ['补错误分支', '写 README', '让朋友按文档试跑或自演', '修文档洞'],
@@ -268,7 +322,7 @@ export const skillTypescriptPack: CurriculumPack = {
       title: '门禁 T-G3：小项目演示验收',
       track: 'gate',
       gateId: 'T-G3',
-      estimatedMinutes: 100,
+      estimatedMinutes: 90,
       content:
         '演示工具：讲清问题、类型设计、主路径与限制。提交仓库路径与 5 分钟讲稿/录屏说明。',
       path: ['彩排 5 分钟', '整理限制列表', '提交证据', '写下一步改进'],
@@ -291,8 +345,9 @@ export const skillTypescriptPack: CurriculumPack = {
     {
       phaseId: 'T3',
       phaseName: '小项目',
-      week: 3,
+      week: 4,
       title: '复盘：类型给协作带来的价值',
+      estimatedMinutes: 40,
       content:
         '写短复盘：哪些报错提前拦住了 bug，哪些类型设计过度。形成可迁移到工作项目的原则卡片。',
       path: ['写复盘 400 字', '提炼原则 5 条', '列出下个练习主题', '归档'],
@@ -304,33 +359,13 @@ export const skillTypescriptPack: CurriculumPack = {
         ['t33', '下一主题？', '有'],
       ],
       deliverable: '复盘.md',
-      minimumMode: true,
     },
     {
       phaseId: 'T3',
       phaseName: '小项目',
-      week: 3,
-      title: '加餐：读一段开源 TS 类型',
-      content:
-        '阅读一个小型开源库的类型定义（或官方示例），记录 3 个看不懂后查懂的点，训练阅读真实代码能力。',
-      path: ['选仓库/示例', '读类型定义', '记录 3 个疑问与答案', '分享笔记'],
-      references: [
-        ref('TypeScript Examples', 'https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html'),
-      ],
-      acceptanceCriteria: ['3 个疑问闭环', '笔记可分享'],
-      acceptanceTests: [
-        ['t34', '读的是什么？', '指出'],
-        ['t35', '一个疑问？', '说出'],
-        ['t36', '答案来源？', '文档/推断'],
-      ],
-      deliverable: '阅读笔记',
-      track: 'side',
-    },
-    {
-      phaseId: 'T3',
-      phaseName: '小项目',
-      week: 3,
+      week: 4,
       title: '缓冲补债日',
+      estimatedMinutes: 50,
       content:
         '专用于补齐未 Pass 的任务。若已全部 Pass，则重构小项目命名与文件夹结构，提升作品集观感。',
       path: ['筛选 Fail/Partial', '逐项补验收', '或重构结构', '更新 README'],
@@ -348,8 +383,9 @@ export const skillTypescriptPack: CurriculumPack = {
     {
       phaseId: 'T3',
       phaseName: '小项目',
-      week: 3,
+      week: 4,
       title: '作品集包装与对外一句话',
+      estimatedMinutes: 45,
       content:
         '把项目写成作品集条目：问题、方案、技术栈、链接、局限。练就面试/述职可用的 30 秒介绍。',
       path: ['写作品集条目', '练 30 秒介绍', '请人听一遍', '按反馈改'],
@@ -361,13 +397,13 @@ export const skillTypescriptPack: CurriculumPack = {
         ['t42', '反馈是什么？', '有'],
       ],
       deliverable: '作品集条目',
-      minimumMode: true,
     },
     {
       phaseId: 'T3',
       phaseName: '小项目',
-      week: 3,
+      week: 4,
       title: '结营：技能迁移清单',
+      estimatedMinutes: 40,
       content:
         '列出把 TS 迁移到工作/学业的 5 个下一步（例如给旧 JS 模块补类型、在业务项目开严格模式等）。',
       path: ['写迁移清单 5 条', '标优先级', '设第一周行动', '归档全包'],
@@ -387,29 +423,10 @@ export const skillTypescriptPack: CurriculumPack = {
     {
       phaseId: 'T3',
       phaseName: '小项目',
-      week: 3,
-      title: '休息日：仅复习闪卡',
-      track: 'rest',
-      estimatedMinutes: 25,
-      content:
-        '只复习类型术语闪卡（interface/type/union/generics/async）。低强度保持记忆连续性，适合疲惫日。',
-      path: ['过闪卡 15 分钟', '默写 5 个定义', '记录遗忘项'],
-      references: [ref('Everyday Types', TS_EVERYDAY)],
-      acceptanceCriteria: ['闪卡完成', '遗忘项记录'],
-      acceptanceTests: [
-        ['t46', 'union 是什么？', '正确'],
-        ['t47', 'generic 是什么？', '正确'],
-        ['t48', '遗忘项？', '列出或无'],
-      ],
-      deliverable: '闪卡日志',
-      minimumMode: true,
-    },
-    {
-      phaseId: 'T3',
-      phaseName: '小项目',
-      week: 3,
+      week: 4,
       title: '可选：为小项目加测试',
       track: 'side',
+      estimatedMinutes: 50,
       content:
         '若有余力，为核心函数加最小测试（任意测试框架或断言脚本）。把「可验证」当成技能标准的一部分。',
       path: ['选 2 个纯函数', '加断言/测试', '接入 npm script', '更新 README'],

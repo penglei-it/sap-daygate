@@ -91,7 +91,7 @@ export function Onboarding({ api }: { api: DayGateApi }) {
           {step === 1
             ? '先选称呼与人员类型，后面会按你的节奏推荐课表。'
             : step === 2
-              ? '选择课程包。标「推荐」的更贴合你的类型。'
+              ? '选择课程包。标「推荐」的更贴合你的类型。课表按连续日历日推进（第 n 课对应开营日后第 n 天）。'
               : '监护人可看进度、留鼓励；儿童建议设置 PIN。也可稍后在设置里配。'}
         </p>
 
@@ -265,6 +265,9 @@ export function Onboarding({ api }: { api: DayGateApi }) {
               </select>
             </label>
             <p className="muted">{pack.summary}</p>
+            <p className="muted" style={{ marginTop: 0 }}>
+              本包共 {pack.days.length} 课 · 按连续日历日推进
+            </p>
 
             {(pack.optionFields ?? []).map((field) => (
               <label className="field" key={field.id}>

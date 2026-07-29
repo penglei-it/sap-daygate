@@ -6,8 +6,8 @@ import { buildDaysFromDrafts, ref } from './dayFactory';
  */
 export const taskOkrPack: CurriculumPack = {
   id: 'task-personal-okr',
-  version: '1.0.0',
-  title: '个人目标与任务管理 21 天',
+  version: '1.1.0',
+  title: '个人目标与任务管理 20 课',
   subtitle: '目标澄清 → 周计划 → 复盘闭环',
   category: 'task',
   locale: 'zh-CN',
@@ -19,7 +19,8 @@ export const taskOkrPack: CurriculumPack = {
     'senior_learner',
   ],
   summary:
-    '不绑定具体学科。教你把大目标拆成可验收的每日任务，并建立复盘习惯。家长可陪伴小学阶段完成。',
+    '共 20 课，按连续日历日推进。不绑定具体学科。教你把大目标拆成可验收的每日任务，并建立复盘习惯。家长可陪伴小学阶段完成。',
+  optionalTracks: ['side'],
   optionFields: [
     {
       id: 'goalTheme',
@@ -39,7 +40,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '澄清目标',
       week: 1,
       title: '写下你真正在意的一件事',
-      estimatedMinutes: 40,
+      estimatedMinutes: 35,
       content:
         '从生活、学习或工作中选一件真正在意的事。今天只澄清「为什么在意」，不急着列一堆任务，避免一开始就无效忙碌。',
       path: ['写下候选 3 件事', '选 1 件最在意的', '写为什么（5 句）', '告诉一位支持者'],
@@ -60,7 +61,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '澄清目标',
       week: 1,
       title: '把目标改成可验收句子',
-      estimatedMinutes: 45,
+      estimatedMinutes: 40,
       content:
         '把模糊愿望改成可观察结果。例如从「学习更好」改成「连续 14 天完成晚间 40 分钟专注学习并记录」。',
       path: ['写出模糊版', '改成可观察版', '加时间盒', '定义完成证据'],
@@ -81,6 +82,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '澄清目标',
       week: 1,
       title: '列出障碍与最小可行行动',
+      estimatedMinutes: 45,
       content:
         '找出会让你失败的障碍（时间、情绪、环境），并为每个障碍设计一个「小到几乎不能不做」的最小行动。',
       path: ['列障碍≥5', '每个配最小行动', '选明天只做 1 个', '准备触发条件'],
@@ -100,6 +102,7 @@ export const taskOkrPack: CurriculumPack = {
       title: '门禁 O-G1：目标澄清验收',
       track: 'gate',
       gateId: 'O-G1',
+      estimatedMinutes: 40,
       content:
         '向自己或家长/同事讲解：目标句、证据、障碍与最小行动。讲不清就回去改，不允许空 Pass。',
       path: ['讲 3 分钟', '收集 1 条反馈', '修订目标句', '提交证据'],
@@ -124,6 +127,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '执行系统',
       week: 2,
       title: '设计你的一周模板',
+      estimatedMinutes: 45,
       content:
         '按你的人员类型精力，设计一周里哪些天做主任务、哪些天保底。模板要能直接复制到日历。',
       path: ['画出一周格子', '标主任务日', '标保底日', '写入日历'],
@@ -142,6 +146,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '执行系统',
       week: 2,
       title: '任务拆到「下一步动作」',
+      estimatedMinutes: 50,
       content:
         '把本周目标拆成下一步动作级别（可在 25～40 分钟完成）。动作要以动词开头，避免「学习英语」这种无法开始的条目。',
       path: ['列本周结果', '拆成动作≥8', '每个估时', '排序前 3'],
@@ -159,6 +164,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '执行系统',
       week: 2,
       title: '执行日：完成前 3 优先之一',
+      estimatedMinutes: 55,
       content:
         '真正做一件事。开始前写下「完成长什么样」，结束后留下证据（勾选、照片、字数、时长）。',
       path: ['选 1 个优先', '写完成定义', '专注执行', '留证据'],
@@ -178,6 +184,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '执行系统',
       week: 2,
       title: '处理中断与保底策略',
+      estimatedMinutes: 40,
       content:
         '预演出差、加班、情绪低落时的保底动作（≤25 分钟）。保底不是放弃，而是保持链条不断。',
       path: ['写 3 种中断场景', '各配保底动作', '今天演练一次保底', '记录感受'],
@@ -189,7 +196,6 @@ export const taskOkrPack: CurriculumPack = {
         ['o21', '感受？', '如实'],
       ],
       deliverable: '保底策略卡',
-      minimumMode: true,
     },
     {
       phaseId: 'O2',
@@ -198,6 +204,7 @@ export const taskOkrPack: CurriculumPack = {
       title: '门禁 O-G2：一周执行验收',
       track: 'gate',
       gateId: 'O-G2',
+      estimatedMinutes: 45,
       content:
         '回顾本周：计划了什么、做了什么、断了哪天、保底是否生效。用数据说话，不靠感觉夸自己。',
       path: ['统计完成数', '标出中断日', '评估保底', '调整下周模板'],
@@ -218,10 +225,31 @@ export const taskOkrPack: CurriculumPack = {
       minimumMode: true,
     },
     {
+      phaseId: 'O2',
+      phaseName: '执行系统',
+      week: 2,
+      title: '休息日：只做保底复盘三问',
+      track: 'rest',
+      estimatedMinutes: 15,
+      content:
+        '执行门禁后的中段轻量日。低能量只写复盘三问，不做新计划。保护连续性比硬撑高强度更重要。',
+      path: ['写三问', '勾选保底完成', '早点休息'],
+      references: [ref('习惯', 'https://zh.wikipedia.org/wiki/習慣')],
+      acceptanceCriteria: ['三问写完'],
+      acceptanceTests: [
+        ['o46', '今天做了什么？', '有'],
+        ['o47', '学到什么？', '有'],
+        ['o48', '明天第一件事？', '有'],
+      ],
+      deliverable: '保底复盘',
+      minimumMode: true,
+    },
+    {
       phaseId: 'O3',
       phaseName: '复盘升级',
       week: 3,
       title: '每日复盘三问模板',
+      estimatedMinutes: 30,
       content:
         '建立固定三问：做了什么、学到什么、明天第一件事。复盘不超过 10 分钟，重在连续。',
       path: ['抄三问模板', '今晚实做一次', '设每日提醒', '连续策略写清'],
@@ -240,6 +268,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '复盘升级',
       week: 3,
       title: '识别自我欺骗式忙碌',
+      estimatedMinutes: 40,
       content:
         '列出你常做但并不推动目标的忙碌（刷资料、完美整理、反复计划）。给每项一个替代真实行动。',
       path: ['列假忙碌≥5', '写替代行动', '今天砍掉 1 项', '记录节省时间'],
@@ -257,6 +286,7 @@ export const taskOkrPack: CurriculumPack = {
       phaseName: '复盘升级',
       week: 3,
       title: '奖励与问责设计',
+      estimatedMinutes: 35,
       content:
         '给连续完成设计小奖励，并找一个问责对象（朋友/家长/同事）或公开打卡方式，提高完成率。',
       path: ['设计小奖励', '选定问责方式', '沟通一次', '写进周模板'],
@@ -268,7 +298,25 @@ export const taskOkrPack: CurriculumPack = {
         ['o30', '是否已沟通？', '是/计划'],
       ],
       deliverable: '奖励问责卡',
-      minimumMode: true,
+    },
+    {
+      phaseId: 'O3',
+      phaseName: '复盘升级',
+      week: 3,
+      title: '家庭/团队协作版（可选）',
+      track: 'side',
+      estimatedMinutes: 40,
+      content:
+        '中段侧支：若你是家长或管理者，把同一套方法教给一位同伴：一起定一个小目标并互相问责三天。',
+      path: ['选同伴', '共定小目标', '互问责 3 天', '写协作体会'],
+      references: [ref('目标管理', 'https://zh.wikipedia.org/wiki/目標管理')],
+      acceptanceCriteria: ['同伴目标存在', '三天记录'],
+      acceptanceTests: [
+        ['o34', '同伴是谁？', '有'],
+        ['o35', '小目标？', '具体'],
+        ['o36', '体会？', '有'],
+      ],
+      deliverable: '协作记录',
     },
     {
       phaseId: 'O3',
@@ -296,6 +344,7 @@ export const taskOkrPack: CurriculumPack = {
       title: '门禁 O-G3：手册与习惯验收',
       track: 'gate',
       gateId: 'O-G3',
+      estimatedMinutes: 50,
       content:
         '验收你是否具备可迁移的执行系统：不是靠一次热情，而是有手册、保底与复盘。提交手册路径与一周数据。',
       path: ['提交手册', '提交一周统计', '讲 5 分钟', '写下个月目标'],
@@ -318,26 +367,9 @@ export const taskOkrPack: CurriculumPack = {
     {
       phaseId: 'O3',
       phaseName: '复盘升级',
-      week: 3,
-      title: '家庭/团队协作版（可选）',
-      track: 'side',
-      content:
-        '若你是家长或管理者，把同一套方法教给一位同伴：一起定一个小目标并互相问责三天。',
-      path: ['选同伴', '共定小目标', '互问责 3 天', '写协作体会'],
-      references: [ref('目标管理', 'https://zh.wikipedia.org/wiki/目標管理')],
-      acceptanceCriteria: ['同伴目标存在', '三天记录'],
-      acceptanceTests: [
-        ['o34', '同伴是谁？', '有'],
-        ['o35', '小目标？', '具体'],
-        ['o36', '体会？', '有'],
-      ],
-      deliverable: '协作记录',
-    },
-    {
-      phaseId: 'O3',
-      phaseName: '复盘升级',
-      week: 3,
+      week: 4,
       title: '失败周预案',
+      estimatedMinutes: 35,
       content:
         '预设「整周崩盘」后的重启流程：不自责长文，只做重启清单（睡好、清桌面、完成一个 10 分钟行动）。',
       path: ['写重启清单', '放进手册', '演练想象一次', '设触发条件'],
@@ -354,8 +386,9 @@ export const taskOkrPack: CurriculumPack = {
     {
       phaseId: 'O3',
       phaseName: '复盘升级',
-      week: 3,
+      week: 4,
       title: '度量升级：领先指标',
+      estimatedMinutes: 45,
       content:
         '区分滞后指标（结果）与领先指标（行为次数）。把每日「开始次数」「保底完成」当成可管理指标。',
       path: ['定义 2 个领先指标', '定义 1 个滞后指标', '做一周记录表', '设定预警线'],
@@ -371,8 +404,9 @@ export const taskOkrPack: CurriculumPack = {
     {
       phaseId: 'O3',
       phaseName: '复盘升级',
-      week: 3,
+      week: 4,
       title: '结营分享：教会另一个人',
+      estimatedMinutes: 50,
       content:
         '用 8 分钟把本包方法教给另一个人。教是最好的验收——讲不清的地方就是你还没真会的地方。',
       path: ['准备 8 分钟提纲', '交付教学', '记录对方疑问', '回填手册'],
@@ -385,33 +419,13 @@ export const taskOkrPack: CurriculumPack = {
       ],
       deliverable: '教学记录',
       requireEvidence: true,
-      minimumMode: true,
     },
     {
       phaseId: 'O3',
       phaseName: '复盘升级',
-      week: 3,
-      title: '休息日：只做保底复盘三问',
-      track: 'rest',
-      estimatedMinutes: 15,
-      content:
-        '低能量日只写复盘三问，不做新计划。保护连续性比硬撑高强度更重要。',
-      path: ['写三问', '勾选保底完成', '早点休息'],
-      references: [ref('习惯', 'https://zh.wikipedia.org/wiki/習慣')],
-      acceptanceCriteria: ['三问写完'],
-      acceptanceTests: [
-        ['o46', '今天做了什么？', '有'],
-        ['o47', '学到什么？', '有'],
-        ['o48', '明天第一件事？', '有'],
-      ],
-      deliverable: '保底复盘',
-      minimumMode: true,
-    },
-    {
-      phaseId: 'O3',
-      phaseName: '复盘升级',
-      week: 3,
+      week: 4,
       title: '下个月计划生成',
+      estimatedMinutes: 40,
       content:
         '基于手册生成下个月 4 周主题。只定主题与每周门禁，不一次排爆，留给自己弹性。',
       path: ['写 4 周主题', '各定一个门禁', '设开营日', '归档本月材料'],

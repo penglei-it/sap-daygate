@@ -12,9 +12,9 @@ const LEARN = 'https://learning.sap.com/';
  */
 export const sapAbapPack: CurriculumPack = {
   id: 'skill-sap-abap',
-  version: '2.0.0',
+  version: '2.1.0',
   title: 'SAP ABAP · S/4 扩展成长',
-  subtitle: '在职/转行：RAP · Clean Core · 作品集门禁',
+  subtitle: '24 课：RAP · Clean Core · 作品集门禁',
   category: 'skill',
   locale: 'zh-CN',
   supportedPersonTypes: [
@@ -24,7 +24,7 @@ export const sapAbapPack: CurriculumPack = {
     'exam_sprinter',
   ],
   summary:
-    '从环境摸底到 RAP 闭环与 Clean Core 评估，面向企业 SAP 技术骨干路径。',
+    '共 24 课，按连续日历日推进。从环境摸底到 RAP 闭环与 Clean Core 评估，面向企业 SAP 技术骨干路径。',
   optionFields: [
     {
       id: 'businessDomain',
@@ -39,7 +39,7 @@ export const sapAbapPack: CurriculumPack = {
       ],
     },
   ],
-  optionalTracks: ['cert', 'side'],
+  optionalTracks: ['side'],
   phases: [
     { id: 'A', name: '摸底', goal: '契约与环境就绪', gateId: 'M0' },
     { id: 'B', name: 'RAP筑基', goal: '可演示小应用', gateId: 'M1' },
@@ -52,8 +52,9 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: '摸底',
       week: 1,
       title: '开营：建立知识库与学习契约',
+      estimatedMinutes: 45,
       content:
-        '明确 12 周内要成为「能做 S/4 扩展决策的 ABAP」；创建笔记目录；写下每周小时、放弃清单。今天不写业务代码，只装好学习操作系统。',
+        '明确本包结束后要成为「能做 S/4 扩展决策的 ABAP」；创建笔记目录；写下每周小时、放弃清单。今天不写业务代码，只装好学习操作系统。',
       path: [
         '创建 SAP-Growth 目录结构',
         '填写周小时与放弃清单',
@@ -80,6 +81,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: '摸底',
       week: 1,
       title: '技能盘点：24 个月能力雷达',
+      estimatedMinutes: 55,
       content:
         '按报表/增强/接口/OO/CDS/RAP/Fiori/性能/权限盘点熟练度 1～5，并找出 3 个可写作品集的真实项目，禁止虚构经历。',
       path: [
@@ -103,6 +105,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: '摸底',
       week: 1,
       title: '环境档案：系统与扩展事实摸底',
+      estimatedMinutes: 60,
       content:
         '写清 ECC/S4、是否 RISE、Fiori、BTP、中间件。未知必须写「待问+负责人」，禁止把未知当已知长期空着。',
       path: [
@@ -128,9 +131,9 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: '摸底',
       week: 1,
       title: '练习环境攻坚（必须可登录）',
-      estimatedMinutes: 120,
+      estimatedMinutes: 100,
       content:
-        '优先级：公司沙箱 > 学习机 > Trial。若无法创建对象，必须写降级验收方案，否则后续 RAP 门禁不可虚假 Pass。',
+        '优先级：公司沙箱 > 学习机 > Trial。若无法创建对象，必须写降级验收方案，否则后续 RAP 门禁不可虚假 Pass。今天只攻坚环境，门禁留到缓冲日之后。',
       path: [
         '申请或登录练习系统',
         '验证可打开 ADT/SE80',
@@ -154,9 +157,30 @@ export const sapAbapPack: CurriculumPack = {
       phaseId: 'A',
       phaseName: '摸底',
       week: 1,
+      title: '缓冲日：整理证据与术语闪卡',
+      track: 'rest',
+      estimatedMinutes: 25,
+      content:
+        '承接环境攻坚的低强度日。只整理截图路径、补全待问清单，并过一遍 15 张扩展术语闪卡。不为门禁硬撑加班，给次日验收留清醒状态。',
+      path: ['整理环境证据夹', '补待问清单', '过术语闪卡 15 分钟', '早点收工'],
+      references: [ref('RAP 预读', RAP), ref('Learning', LEARN)],
+      acceptanceCriteria: ['证据路径可打开', '闪卡完成'],
+      acceptanceTests: [
+        ['a13', '证据夹路径？', '写出'],
+        ['a14', '待问还剩几条？', '数字'],
+        ['a15', '一个术语定义？', '能说'],
+      ],
+      deliverable: '缓冲日志',
+      minimumMode: true,
+    },
+    {
+      phaseId: 'A',
+      phaseName: '摸底',
+      week: 1,
       title: '门禁 M0：摸底验收',
       track: 'gate',
       gateId: 'M0',
+      estimatedMinutes: 50,
       content:
         '对照契约、盘点、环境、练习机状态做一次正式门禁。未完成项只能结转或降级书面化，不可假装完成。',
       path: [
@@ -186,6 +210,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'RAP筑基',
       week: 2,
       title: '三种扩展方式对比（Clean Core 语境）',
+      estimatedMinutes: 55,
       content:
         '建立 Key User / Developer / Side-by-side 决策语言，并用一个公司真实需求做归类，避免只会背名词。',
       path: [
@@ -209,6 +234,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'RAP筑基',
       week: 2,
       title: 'RAP 分层心智模型与术语表',
+      estimatedMinutes: 65,
       content:
         '完成公开课/文档导读，画清数据/行为/服务分层，并建立至少 25 个中英术语，为 CDS/Behavior 动手做准备。',
       path: [
@@ -232,6 +258,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'RAP筑基',
       week: 2,
       title: 'CDS View Entity 第一个可激活对象',
+      estimatedMinutes: 90,
       content:
         '在练习环境创建并激活第一个 view entity；若环境降级，则完成等价设计文档并标注阻塞，不得空 Pass。',
       path: [
@@ -255,6 +282,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'RAP筑基',
       week: 2,
       title: 'Association / Composition 差异精练',
+      estimatedMinutes: 55,
       content:
         '用自己的话区分 association 与 composition，并在模型草图中各举一例，服务后续 BO 子实体设计。',
       path: [
@@ -276,7 +304,30 @@ export const sapAbapPack: CurriculumPack = {
       phaseId: 'B',
       phaseName: 'RAP筑基',
       week: 3,
+      title: '加餐：读一篇 Clean Core / RAP 社区文',
+      track: 'side',
+      estimatedMinutes: 40,
+      content:
+        '可选侧支：精读一篇社区或官方 Clean Core / RAP 实践文，摘 5 条可迁移到本公司的要点。冲刺模式可隐藏本课；标准模式建议完成以拓宽视野。',
+      path: ['选一篇近期文章', '摘录 5 条要点', '标注与本公司相关的 2 条', '分享给一位同事或写入笔记'],
+      references: [
+        ref('Community Clean Core', 'https://community.sap.com/?q=clean%20core'),
+        ref('Developers', DEV),
+      ],
+      acceptanceCriteria: ['要点≥5', '公司相关≥2'],
+      acceptanceTests: [
+        ['bs1', '文章标题？', '写出'],
+        ['bs2', '一条可迁移要点？', '具体'],
+        ['bs3', '是否与本公司相关？', '有理由'],
+      ],
+      deliverable: '社区阅读笔记',
+    },
+    {
+      phaseId: 'B',
+      phaseName: 'RAP筑基',
+      week: 3,
       title: '投影视图与常用注解速查',
+      estimatedMinutes: 70,
       content:
         '完成投影裁剪，并整理 ≥20 条常用注解（UI/Consumption/Access 等），每条写「何时用」避免机械堆积。',
       path: [
@@ -300,7 +351,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'RAP筑基',
       week: 3,
       title: 'Behavior：BO 骨架与 CRUD 幸福路径',
-      estimatedMinutes: 100,
+      estimatedMinutes: 110,
       content:
         '创建业务对象骨架并实现 create/update（或 delete）幸福路径；用测试表记录正例与至少 2 个负例，形成可回归证据。',
       path: [
@@ -324,6 +375,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'RAP筑基',
       week: 3,
       title: '校验/确定 + 服务暴露',
+      estimatedMinutes: 95,
       content:
         '至少两条 validation 与一条 determination；完成 Service Definition/Binding，并写出权限设计草稿（即使尚未完全配置）。',
       path: [
@@ -349,7 +401,7 @@ export const sapAbapPack: CurriculumPack = {
       title: '门禁 M1：RAP 演示验收',
       track: 'gate',
       gateId: 'M1',
-      estimatedMinutes: 120,
+      estimatedMinutes: 100,
       content:
         '正式演示 RAP 小应用：功能、校验、服务、README、对比文（经典 vs RAP）。无证据不得 Pass。录制或逐字稿均可。',
       path: [
@@ -379,6 +431,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'Clean Core',
       week: 4,
       title: '脏核心清单与 A/B/C/D 分级',
+      estimatedMinutes: 85,
       content:
         '把公司自定义扩到可评审清单，按清洁/可接受/不推荐/未知分级，并为每条附证据（传输号/对象名）。',
       path: [
@@ -405,6 +458,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'Clean Core',
       week: 4,
       title: '同一需求三种扩展故事',
+      estimatedMinutes: 70,
       content:
         '选同一业务需求，分别写 Key User / on-stack 开发 / side-by-side 三条路径，比较成本、升级风险与适用边界。',
       path: [
@@ -427,6 +481,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: 'Clean Core',
       week: 4,
       title: '集成族谱与检查清单',
+      estimatedMinutes: 80,
       content:
         '盘点入站/出站接口族谱，并沉淀幂等、重试、对账、超时等非功能检查清单，直接可用于接口评审。',
       path: [
@@ -455,7 +510,7 @@ export const sapAbapPack: CurriculumPack = {
       title: '门禁 M2：Clean Core 评估文档',
       track: 'gate',
       gateId: 'M2',
-      estimatedMinutes: 120,
+      estimatedMinutes: 100,
       content:
         '交付可给架构师审阅的评估 v1.0：范围、方法、发现、Top5、路线图、风险。必须附证据与反馈记录。',
       path: [
@@ -481,10 +536,31 @@ export const sapAbapPack: CurriculumPack = {
       requireEvidence: true,
     },
     {
+      phaseId: 'C',
+      phaseName: 'Clean Core',
+      week: 4,
+      title: '缓冲日：评估反馈消化',
+      track: 'rest',
+      estimatedMinutes: 30,
+      content:
+        'M2 与作品集阶段之间的轻量日。只消化反馈、列作品集待办，不做新调研。拉开门禁间隔，避免连轴转入述职压力。',
+      path: ['读完反馈批注', '列作品集待办≤5', '标优先级', '休息收工'],
+      references: [ref('Extensibility', EXT)],
+      acceptanceCriteria: ['待办≤5 已写', '优先级明确'],
+      acceptanceTests: [
+        ['c10', '反馈最重要一条？', '说出'],
+        ['c11', '作品集第一待办？', '具体'],
+        ['c12', '是否开新调研？', '否'],
+      ],
+      deliverable: '反馈消化笔记',
+      minimumMode: true,
+    },
+    {
       phaseId: 'D',
       phaseName: '作品集',
       week: 5,
       title: '业务域单据流精读（按开营域）',
+      estimatedMinutes: 60,
       content:
         '按你选择的业务域，画端到端单据流与异常分支，并能用 10 分钟向非开发同事讲清系统落点。',
       path: [
@@ -508,6 +584,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: '作品集',
       week: 5,
       title: '增强点地图与迁移建议',
+      estimatedMinutes: 75,
       content:
         '梳理该业务链常见增强点≥8，并与 Clean Core 分级交叉，给出每点迁移建议（保留/替换/旁路）。',
       path: [
@@ -534,7 +611,7 @@ export const sapAbapPack: CurriculumPack = {
       phaseName: '作品集',
       week: 5,
       title: '组装作品集三案例',
-      estimatedMinutes: 100,
+      estimatedMinutes: 90,
       content:
         '把 RAP 演示、Clean Core 评估、集成/业务方案脱敏打包为作品集，含定位句与 README，达到可述职水平。',
       path: [
@@ -560,7 +637,7 @@ export const sapAbapPack: CurriculumPack = {
       title: '门禁 M3：作品集与述职预演',
       track: 'gate',
       gateId: 'M3',
-      estimatedMinutes: 120,
+      estimatedMinutes: 100,
       content:
         '20 分钟述职结构预演：问题→方法→成果→诉求。门禁以作品集证据与讲稿完整为准。',
       path: [
