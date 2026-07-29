@@ -266,6 +266,91 @@ export function SettingsPage({ api }: { api: DayGateApi }) {
         <p className="muted">
           每次保存都会写入主存储 + 镜像副本（daygate-v3-mirror）。若主数据异常，可尝试从镜像恢复。
         </p>
+
+        <h3>文件夹自动备份</h3>
+        {!api.folderBackupStatus.supported ? (
+          <p className="muted">
+            当前浏览器不支持「选文件夹备份」（需 Chrome / Edge 等支持 File System Access
+            API）。请继续使用下方「导出备份 JSON」。
+          </p>
+        ) : (
+          <>
+            <p className="muted">
+              {api.folderBackupStatus.hasFolder
+                ? `已选择文件夹：${api.folderBackupStatus.folderName ?? '（已授权）'}`
+                : '尚未选择备份文件夹。选定后，验收通过（pass/partial）与门禁 Pass 时会自动写入。'}
+            </p>
+            <p className="muted">
+              上次成功备份：
+              {api.state.lastFolderBackupAt
+                ? new Date(api.state.lastFolderBackupAt).toLocaleString('zh-CN')
+                : '尚无'}
+            </p>
+            {api.folderBackupStatus.hasFolder &&
+            api.folderBackupStatus.permission === 'prompt' ? (
+              <p className="muted">
+                权限需重新确认：下次备份或点击「立即备份到文件夹」时会弹出授权。
+              </p>
+            ) : null}
+            {api.folderBackupStatus.hasFolder &&
+            api.folderBackupStatus.permission === 'denied' ? (
+              <p className="muted">
+                写入权限已被拒绝，请重新选择备份文件夹并允许访问。
+              </p>
+            ) : null}
+            <div className="meta-row">
+              <button
+                className="btn"
+                type="button"
+                disabled={api.folderBackupBusy}
+                onClick={() => void api.selectBackupFolder()}
+              >
+                选择备份文件夹
+              </button>
+              <button
+                className="btn secondary"
+                type="button"
+                disabled={
+                  api.folderBackupBusy || !api.folderBackupStatus.hasFolder
+                }
+                onClick={() => void api.backupToFolderNow()}
+              >
+                立即备份到文件夹
+              </button>
+              {api.folderBackupStatus.hasFolder ? (
+                <button
+                  className="btn ghost"
+                  type="button"
+                  disabled={api.folderBackupBusy}
+                  onClick={() => {
+                    if (confirm('清除已选备份文件夹？（不会删除磁盘上的备份文件）')) {
+                      void api.clearBackupFolder();
+                    }
+                  }}
+                >
+                  清除所选文件夹
+                </button>
+              ) : null}
+            </div>
+            {api.folderBackupError ? (
+              <p className="muted" role="alert">
+                {api.folderBackupError}
+              </p>
+            ) : null}
+            <p className="muted">
+              写入文件：<code>daygate-backup-latest.json</code>
+              （覆盖）以及当日副本{' '}
+              <code>daygate-backup-YYYY-MM-DD.json</code>。句柄保存在 IndexedDB，不会进入
+              localStorage。
+            </p>
+          </>
+        )}
+
+        <h3>手动 JSON 导出 / 导入</h3>
+        <p className="muted">
+          与文件夹备份相互独立：换机、不支持选文件夹的浏览器，或需要分享进度时，请用导出
+          JSON。
+        </p>
         <div className="meta-row">
           <button className="btn" type="button" onClick={download}>
             导出备份 JSON

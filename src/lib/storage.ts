@@ -27,6 +27,7 @@ export function createDefaultState(): UserState {
     guardianName: '监护人',
     companionNotes: {},
     backupReminderPending: false,
+    lastFolderBackupAt: undefined,
     schemaVersion: 3,
   };
 }
@@ -63,6 +64,10 @@ export function loadState(): UserState {
       guardianPinHash: parsed.guardianPinHash ?? '',
       guardianName: parsed.guardianName ?? '监护人',
       backupReminderPending: Boolean(parsed.backupReminderPending),
+      lastFolderBackupAt:
+        typeof parsed.lastFolderBackupAt === 'string'
+          ? parsed.lastFolderBackupAt
+          : undefined,
       schemaVersion: 3,
       personTypeId: parsed.personTypeId ?? base.personTypeId,
       packId: parsed.packId ?? base.packId,

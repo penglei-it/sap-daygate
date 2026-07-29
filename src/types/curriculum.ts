@@ -179,6 +179,11 @@ export interface UserState {
   companionNotes: Record<string, string>;
   /** True after a gate Pass until user exports backup or dismisses. */
   backupReminderPending: boolean;
+  /**
+   * ISO timestamp of the last successful write to the chosen backup folder.
+   * Directory handles are stored in IndexedDB, not in this object.
+   */
+  lastFolderBackupAt?: string;
   /** Schema version for migrations. */
   schemaVersion: number;
 }

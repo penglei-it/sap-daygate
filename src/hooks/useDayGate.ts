@@ -9,6 +9,15 @@ import { importPackFromJson } from '../core/packImport';
 import { getPersonType } from '../core/personTypes';
 import { addDays, diffDays, formatISODate, weekKey } from '../lib/date';
 import { hashEvidence } from '../lib/evidence';
+import {
+  backupJsonToStoredFolder,
+  clearDirectoryHandle,
+  formatFolderBackupError,
+  getFolderBackupStatus,
+  isFolderBackupSupported,
+  pickBackupFolder,
+  type FolderBackupStatus,
+} from '../lib/folderBackup';
 import { hashPin, verifyPin } from '../lib/security';
 import {
   createDefaultState,
@@ -39,11 +48,76 @@ export function useDayGate() {
   const [state, setState] = useState<UserState>(() => loadState());
   const [viewDate, setViewDate] = useState(() => formatISODate(new Date()));
   const [packImportMessage, setPackImportMessage] = useState<string | null>(null);
+  const [folderBackupStatus, setFolderBackupStatus] =
+    useState<FolderBackupStatus>(() => ({
+      supported: isFolderBackupSupported(),
+      hasFolder: false,
+    }));
+  const [folderBackupError, setFolderBackupError] = useState<string | null>(
+    null,
+  );
+  const [folderBackupBusy, setFolderBackupBusy] = useState(false);
 
   useEffect(() => {
     saveState(state);
   }, [state]);
 
+  // Verify IndexedDB directory handle + permission on startup (no prompt).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const status = await getFolderBackupStatus();
+        if (!cancelled) setFolderBackupStatus(status);
+      } catch {
+        if (!cancelled) {
+          setFolderBackupStatus({
+            supported: isFolderBackupSupported(),
+            hasFolder: false,
+          });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
+   * Writes JSON to the stored folder and updates lastFolderBackupAt on success.
+   * @param json - Serialized user state.
+   * @param options.clearReminder - Also clear backupReminderPending.
+   * @returns True when write succeeded.
+   */
+  const writeFolderBackup = useCallback(
+    async (
+      json: string,
+      options?: { clearReminder?: boolean },
+    ): Promise<boolean> => {
+      setFolderBackupBusy(true);
+      setFolderBackupError(null);
+      try {
+        await backupJsonToStoredFolder(json);
+        const at = new Date().toISOString();
+        setState((s) => ({
+          ...s,
+          lastFolderBackupAt: at,
+          backupReminderPending: options?.clearReminder
+            ? false
+            : s.backupReminderPending,
+        }));
+        const status = await getFolderBackupStatus();
+        setFolderBackupStatus(status);
+        return true;
+      } catch (err) {
+        setFolderBackupError(formatFolderBackupError(err));
+        return false;
+      } finally {
+        setFolderBackupBusy(false);
+      }
+    },
+    [],
+  );
   const person = getPersonType(state.personTypeId);
   const allPacks = useMemo(
     () => mergeWithCustomPacks(state.customPacks),
@@ -141,12 +215,13 @@ export function useDayGate() {
           status === 'skipped' ? (input.skipReason ?? '').trim() : undefined,
       };
 
+      let nextState: UserState | null = null;
       setState((s) => {
         const key = `${s.packId}:${plan.dayIndex}`;
         const wk = weekKey(viewDate);
         const prevHours = s.weeklyHours[wk] ?? 0;
         const gatePassed = status === 'pass' && Boolean(plan.gateId);
-        return {
+        nextState = {
           ...s,
           checkIns: { ...s.checkIns, [key]: record },
           weeklyHours: {
@@ -155,11 +230,29 @@ export function useDayGate() {
           },
           backupReminderPending: gatePassed ? true : s.backupReminderPending,
         };
+        return nextState;
       });
+
+      // Auto-write latest (+ dated) after pass/partial when a folder is configured.
+      if (
+        (status === 'pass' || status === 'partial') &&
+        folderBackupStatus.hasFolder &&
+        nextState
+      ) {
+        void writeFolderBackup(exportStateJson(nextState), {
+          clearReminder: Boolean(plan.gateId) && status === 'pass',
+        });
+      }
 
       return status;
     },
-    [state.packId, state.viewRole, viewDate],
+    [
+      state.packId,
+      state.viewRole,
+      viewDate,
+      folderBackupStatus.hasFolder,
+      writeFolderBackup,
+    ],
   );
 
   const getCheckIn = useCallback(
@@ -301,6 +394,54 @@ export function useDayGate() {
     setState((s) => ({ ...s, backupReminderPending: false }));
   }, []);
 
+  /**
+   * Opens the directory picker, stores the handle in IndexedDB, and refreshes status.
+   * @returns True when a folder was selected and permission granted.
+   */
+  const selectBackupFolder = useCallback(async (): Promise<boolean> => {
+    setFolderBackupBusy(true);
+    setFolderBackupError(null);
+    try {
+      const handle = await pickBackupFolder();
+      setFolderBackupStatus({
+        supported: true,
+        hasFolder: true,
+        folderName: handle.name,
+        permission: 'granted',
+      });
+      return true;
+    } catch (err) {
+      setFolderBackupError(formatFolderBackupError(err));
+      return false;
+    } finally {
+      setFolderBackupBusy(false);
+    }
+  }, []);
+
+  /**
+   * Manually writes the current state to the stored backup folder.
+   * @returns True when write succeeded.
+   */
+  const backupToFolderNow = useCallback(async (): Promise<boolean> => {
+    return writeFolderBackup(exportStateJson(state), { clearReminder: true });
+  }, [state, writeFolderBackup]);
+
+  /**
+   * Clears the stored directory handle (does not delete backup files on disk).
+   */
+  const clearBackupFolder = useCallback(async (): Promise<void> => {
+    setFolderBackupError(null);
+    try {
+      await clearDirectoryHandle();
+      setFolderBackupStatus({
+        supported: isFolderBackupSupported(),
+        hasFolder: false,
+      });
+    } catch (err) {
+      setFolderBackupError(formatFolderBackupError(err));
+    }
+  }, []);
+
   const setCompanionNote = useCallback((dayIndex: number, note: string) => {
     setState((s) => {
       const key = `${s.packId}:${dayIndex}`;
@@ -364,6 +505,12 @@ export function useDayGate() {
     setCompanionNote,
     dismissBackupReminder,
     markBackupExported,
+    selectBackupFolder,
+    backupToFolderNow,
+    clearBackupFolder,
+    folderBackupStatus,
+    folderBackupError,
+    folderBackupBusy,
     exportCurrentPackJson,
     resetAll,
     restoreFromMirror: () => {

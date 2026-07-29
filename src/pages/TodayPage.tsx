@@ -25,11 +25,32 @@ export function TodayPage({ api }: { api: DayGateApi }) {
         <section className="card stack">
           <strong>备份提醒</strong>
           <p className="muted">
-            你刚通过门禁。数据仅存本机浏览器，建议立即导出备份，降低清缓存/换机丢失风险。
+            你刚通过门禁。数据仅存本机浏览器，建议立即备份，降低清缓存/换机丢失风险。
+            {api.folderBackupStatus.hasFolder
+              ? ' 已配置备份文件夹时，系统也会尝试自动写入。'
+              : ''}
           </p>
+          {api.folderBackupError ? (
+            <p className="muted" role="alert">
+              {api.folderBackupError}
+            </p>
+          ) : null}
           <div className="meta-row">
+            {api.folderBackupStatus.supported &&
+            api.folderBackupStatus.hasFolder ? (
+              <button
+                className="btn"
+                type="button"
+                disabled={api.folderBackupBusy}
+                onClick={() => void api.backupToFolderNow()}
+              >
+                立即备份到文件夹
+              </button>
+            ) : null}
             <button
-              className="btn"
+              className={
+                api.folderBackupStatus.hasFolder ? 'btn secondary' : 'btn'
+              }
               type="button"
               onClick={() => {
                 const blob = new Blob([api.exportJson()], {
