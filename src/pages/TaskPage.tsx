@@ -389,7 +389,7 @@ export function TaskPage({ api }: { api: DayGateApi }) {
                     提交验收
                   </button>
                   <button
-                    className="btn secondary"
+                    className="btn ghost"
                     type="button"
                     onClick={() => {
                       setSkipOpen(true);
@@ -466,6 +466,18 @@ export function TaskPage({ api }: { api: DayGateApi }) {
                       </ul>
                     </div>
                   ) : null}
+                  {result === 'partial' || result === 'fail' ? (
+                    <p data-testid="accept-retry-hint">
+                      可继续勾选或修改上方内容后再次提交。
+                      <Link to="/" style={{ marginLeft: 8 }}>
+                        回今天
+                      </Link>
+                    </p>
+                  ) : (
+                    <p>
+                      <Link to="/">回今天</Link>
+                    </p>
+                  )}
                   <p className="muted">
                     通过 = 测试全过 + 路径≥80% + 打字题有效
                     {requireEvidence &&

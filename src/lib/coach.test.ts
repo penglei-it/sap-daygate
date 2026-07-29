@@ -66,6 +66,22 @@ describe('coach', () => {
     expect(queue.map((q) => q.kind)).toEqual(['skipped', 'fail', 'gate']);
   });
 
+  it('labels due gates vs future gates by currentOffset', () => {
+    const days = [
+      day({ dayIndex: 1, gateId: 'G-due', dateOffset: 0 }),
+      day({ dayIndex: 5, gateId: 'G-later', dateOffset: 4 }),
+    ];
+    const due = buildCatchUpQueue({
+      days,
+      packId: 'p',
+      checkIns: {},
+      currentOffset: 1,
+      maxItems: 5,
+    });
+    expect(due.find((q) => q.dayIndex === 1)?.reason).toContain('待完成门禁');
+    expect(due.find((q) => q.dayIndex === 5)?.reason).toContain('后续门禁');
+  });
+
   it('shows streak recall when missed and not on minimum', () => {
     expect(
       shouldShowStreakRecall({

@@ -28,7 +28,7 @@ export function buildSoftReminder(input: {
     return '今天已经完成验收，可以给一句具体表扬（表扬行为，不只夸“真棒”）。';
   }
   if (input.missedLast7 >= 3) {
-    return '最近 7 天有些中断。建议一起把今天改成「保底 15 分钟」，先把链条接上。';
+    return '最近 7 天有些中断。建议一起把今天改成保底模式，先把链条接上。';
   }
   if (input.streakDays >= 3) {
     return `已连续 ${input.streakDays} 天有进展，保持节奏比加量更重要。`;

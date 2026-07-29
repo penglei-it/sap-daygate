@@ -233,6 +233,7 @@ export function Onboarding({ api }: { api: DayGateApi }) {
             </label>
             <p className="muted">
               {person.description} 建议每日约 {person.dailyBudgetMinutes} 分钟。
+              不确定就选最接近的，之后可在设置改。
             </p>
             <p className="person-hint">{person.todayHint}</p>
             <button className="btn" type="button" onClick={() => setStep(2)}>

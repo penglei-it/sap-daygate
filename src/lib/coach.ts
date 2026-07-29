@@ -24,15 +24,20 @@ export interface CatchUpItem {
  * @param input.packId - Active pack id.
  * @param input.checkIns - Persisted check-ins.
  * @param input.maxItems - Max rows to return.
+ * @param input.currentOffset - Days since startDate for viewDate; used to label gates.
+ *   Due/past gates →「待完成门禁」; future gates →「后续门禁」.
  */
 export function buildCatchUpQueue(input: {
   days: DayPlan[];
   packId: string;
   checkIns: Record<string, DayCheckIn>;
   maxItems?: number;
+  /** Offset of the viewed calendar day from pack start (viewDate − startDate). */
+  currentOffset?: number;
 }): CatchUpItem[] {
   const max = input.maxItems ?? 5;
   const items: CatchUpItem[] = [];
+  const currentOffset = input.currentOffset;
 
   for (const d of input.days) {
     const cin = input.checkIns[`${input.packId}:${d.dayIndex}`];
@@ -62,12 +67,16 @@ export function buildCatchUpQueue(input: {
     const cin = input.checkIns[`${input.packId}:${d.dayIndex}`];
     if (cin?.status === 'pass') continue;
     if (items.some((i) => i.dayIndex === d.dayIndex)) continue;
+    // Past/today relative to view → due; future offset → upcoming.
+    const isDue =
+      currentOffset === undefined || d.dateOffset <= currentOffset;
+    const gateLabel = isDue ? '待完成门禁' : '后续门禁';
     items.push({
       key: `gate-${d.dayIndex}`,
       dayIndex: d.dayIndex,
       dateOffset: d.dateOffset,
       title: d.title,
-      reason: `临近/待完成门禁 ${d.gateId}`,
+      reason: `${gateLabel} ${d.gateId}`,
       kind: 'gate',
     });
   }

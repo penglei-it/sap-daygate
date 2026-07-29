@@ -91,7 +91,7 @@ export const PERSON_TYPES: PersonTypeProfile[] = [
     defaultMode: 'sprint',
     uiDensity: 'compact',
     recommendedPackCategories: ['exam'],
-    todayHint: '今日必做：完成课表主线验收。侧支已隐藏，先拿分数相关产出。',
+    todayHint: '冲刺节奏：先完成主线验收。侧支已隐藏，先拿分数相关产出。',
     taskEvidenceHint: '写清题号、错题本页码或模考分数，方便复盘。',
   },
 ];

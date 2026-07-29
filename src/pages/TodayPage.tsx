@@ -57,6 +57,7 @@ export function TodayPage({ api }: { api: DayGateApi }) {
     packId: state.packId,
     checkIns: state.checkIns,
     maxItems: 5,
+    currentOffset: offsetToday,
   });
 
   const neverBackedUp = !state.lastBackupAt && !state.lastFolderBackupAt;
@@ -86,8 +87,8 @@ export function TodayPage({ api }: { api: DayGateApi }) {
       {showStreakRecall ? (
         <section className="soft-tip stack" data-testid="streak-recall">
           <p style={{ margin: 0 }}>
-            近 7 天有 <strong>{missedLast7}</strong> 天中断。没关系——先用保底 15
-            分钟把链条接上就好。
+            近 7 天有 <strong>{missedLast7}</strong> 天中断。没关系——一键开保底（约{' '}
+            {person.dailyBudgetMinutes} 分钟），先接上节奏。
           </p>
           <div className="meta-row" style={{ margin: 0 }}>
             <button
@@ -100,7 +101,7 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                 })
               }
             >
-              一键切到保底
+              一键开保底
             </button>
             <button
               className="btn ghost"
@@ -118,15 +119,19 @@ export function TodayPage({ api }: { api: DayGateApi }) {
       {showSuggested && suggested ? (
         <section className="soft-tip stack" data-testid="suggested-mode">
           <p style={{ margin: 0 }}>
-            监护人建议今天改用
-            <strong>
-              {suggested === 'minimum'
-                ? '保底模式'
-                : suggested === 'sprint'
-                  ? '冲刺模式'
-                  : '标准模式'}
-            </strong>
-            ，先把节奏接上。
+            {suggested === 'minimum' ? (
+              <>
+                家长建议今天用<strong>保底</strong>，先接上节奏。
+              </>
+            ) : (
+              <>
+                监护人建议今天改用
+                <strong>
+                  {suggested === 'sprint' ? '冲刺模式' : '标准模式'}
+                </strong>
+                ，先接上节奏。
+              </>
+            )}
           </p>
           <div className="meta-row" style={{ margin: 0 }}>
             <button
@@ -310,9 +315,8 @@ export function TodayPage({ api }: { api: DayGateApi }) {
                 ) : null}
               </div>
               {person.id === 'exam_sprinter' ? (
-                <p className="sprint-must">
-                  <strong>今日必做：</strong>
-                  {todayPlan.title}
+                <p className="muted sprint-must" data-testid="sprint-tip">
+                  冲刺日：先完成验收再加练
                 </p>
               ) : null}
               <h1>{todayPlan.title}</h1>
@@ -343,7 +347,7 @@ export function TodayPage({ api }: { api: DayGateApi }) {
               )}
               <div className="meta-row">
                 <Link className="btn" to={`/task/${todayPlan.dayIndex}`} data-testid="enter-task">
-                  开始本课
+                  进入今日课
                 </Link>
               </div>
             </>

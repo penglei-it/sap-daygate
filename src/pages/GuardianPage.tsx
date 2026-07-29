@@ -12,6 +12,8 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
   const { guardianSummary: s, state, todayPlan, person, allDays } = api;
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
+  /** Local feedback after suggesting minimum mode to the learner. */
+  const [suggestSent, setSuggestSent] = useState(false);
   const noteKey = todayPlan ? `${state.packId}:${todayPlan.dayIndex}` : '';
   const [note, setNote] = useState(
     todayPlan ? state.companionNotes[noteKey] ?? '' : '',
@@ -113,6 +115,7 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
               type="button"
               onClick={() => {
                 api.suggestMinimumMode(todayPlan.dayIndex);
+                setSuggestSent(true);
                 setNote(
                   state.companionNotes[noteKey] ||
                     '家长建议：今天先用保底模式，完成一小步就很好。',
@@ -123,6 +126,11 @@ export function GuardianPage({ api }: { api: DayGateApi }) {
             </button>
           ) : null}
         </div>
+        {suggestSent ? (
+          <p className="status-pass" role="status" data-testid="suggest-sent">
+            已发给学习者
+          </p>
+        ) : null}
         <p className="muted">
           「建议今天改保底」会给学习者一条横幅，由对方决定是否采纳。
         </p>
